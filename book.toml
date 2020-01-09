@@ -1,0 +1,6 @@
+[book]
+authors = ["garasubo"]
+language = "ja"
+multilingual = false
+src = "src"
+title = "ウェブプログラマーのためのRustで始める自作OS入門"
