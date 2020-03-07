@@ -11,6 +11,12 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustupはRustコンパイラのインストール・アップデートやバージョン管理をしてくれるツールです。
 今回は特に`nightly`と呼ばれる、いわゆるベータ版のようなRustコンパイラを使うことになるのですが、nightlyと安定版である`stable`の切り替えもコマンド一つで行えて大変便利です。
 
+今回はnightlyの2019-09-19のバージョンを使います。以下のようにして`nightly-2019-09-18`をインストールしましょう。
+```
+rustup install nightly-2019-09-18
+```
+
+
 ## 使用ボード
 STマイクロエレクトロニクス社の[NUCLEO-F429ZIボード](https://www.st.com/ja/evaluation-tools/nucleo-f429zi.html)を使用します。
 ただし、この本では多くのペリフェラルは使わないので、ST社のCortex-Mの他のボードでも十分に再現可能かと思われます。

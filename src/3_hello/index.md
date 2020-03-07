@@ -1,6 +1,29 @@
 # ベアメタルでHello World
 この章の内容は[The Embednomicon](https://docs.rust-embedded.org/embedonomicon/preface.html)にちょっと詳しい解説をつけただけです。すでにこちらのドキュメントを読んでいるのであればこの章は飛ばして次の章に進んでください。
 
+## プロジェクトのセットアップ
+`rustup`でRustコマンドをインストールすると`cargo`というコマンドが使えるようになります。
+このコマンドはRust標準のビルドシステム兼パッケージマネージャーです。
+
+まずはOS用の新規プロジェクトをつくりましょう。今回のプロジェクト名は`bookos`で行きます。もし自分の気に入ったプロジェクト名があれば、それでも構いません。
+```
+$ cargo new bookos
+     Created binary (application) `bookos` package
+$ cd bookos
+$ ls
+Cargo.toml  src
+$ ls src
+main.rs
+```
+
+`src/main.rs`をこれから書き換えてHello Worldするプログラムを書いていきます。
+その前に、このプロジェクトでつかうRustのバージョンを指定するために`rust-toolchain`というファイルをこのプロジェクトにおいておきます。
+```
+$ echo "nightly-2019-09-19" > rust-toolchain
+```
+
+このファイルがプロジェクトのトップディレクトリにあることで、rustupにどのバージョンのRustを使えばいいかを自動的に教えて、バージョンを切り替えてくれるようになります。
+
 ## プログラムの実行
 OSのある環境下では、たとえばターミナルから実行コマンドを打つことでOSがプログラムをロードして実行してくれますが、
 OSのないベアメタル環境ではどのように自分の実行したいプログラムを実行すればいいのでしょうか？
@@ -42,12 +65,24 @@ fn panic(_panic: &PanicInfo<'_>) -> ! {
 代わりにパニック時の動作についてはきちんと指定する必要があります。例えば`Option`の`None`に対して`unwrap`を呼び出すと通常のプログラムならば異常終了するはずですが、OSのないベアメタル環境ではこの異常終了時の動作を定義してあげる必要があります。
 これが`#![panic_handler]`アトリビュートがついている`panic`関数、というわけです。今回は単に無限ループさせるだけですね。
 
+このプログラムをビルドしてみましょう。
+普通にビルドしてしまうと、実行しているPC向けのバイナリをつくってしまいますので、ターゲットを指定してあげる必要があります。
+```
+$ cargo build --target thumbv7em-none-eabihf
+   Compiling bookos v0.1.0 (/home/garasubo/workspace/bookos)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.25s
+```
+`thumb`というのはArmの命令セットの名前で、命令長が16ビットになっているという特徴があります。ARM命令と呼ばれる命令セットも存在してそちらは命令長が32ビットなのですが、ARMv7-Mではこちらはサポートされていません。
+後ろの`hf`というのはハードウェアの浮動小数点演算器が存在することをしてしています。一部のARMv7-Mのチップでは浮動小数点演算器がないことがあり、コンパイラでそれらをソフトウェア演算にしなければならないことがあります。
+もっとも、今回は浮動小数点の絡む処理を書く予定はないので、間違えてつけなくても（あるいは違うボードを使っていて浮動小数点演算器がないにもかかわらず`hf`をつけたとしても）問題にはならないでしょう。
+
+
 ## Vector tableを定義する
 stdが使えない問題はクリアしましたが、まだなにもプログラムが実行できない状態なのでこれを解決していきましょう。
 このArmマイコンではVector tableに従って最初に実行されるプログラムが決定されることがマニュアルからわかっているので、このVector tableを組み込んだプログラムをコンパイルできるようにすればこの問題は解決できます。
 プログラムをコンパイルしたとき、各関数や変数がどのようなフォーマットでバイナリとして配置されるかを定義するにはリンカースクリプトというものを使います。
 これはC言語など他の言語でベアメタルプログラミングするときも使うものです。
-The Embednomiconの2.Memory layoutの章で使われているリンカースクリプトを見てみましょう。
+The Embednomiconの2.Memory layoutの章で使われているリンカースクリプトを見てみましょう。このリンカスクリプトは`link.ld`としてプロジェクトのトップディレクトリにおいておきましょう。
 ```
 * Memory layout of the LM3S6965 microcontroller */
 /* 1K = 1 KiBi = 1024 bytes */
@@ -118,3 +153,32 @@ pub unsafe extern "C" fn Reset() -> ! {
     loop {}
 }
 ```
+
+さて、上述のリンカスクリプトを使うためには、コンパイル時にオプションとして渡してあげる必要があります。
+`RUSTFLAGS`を環境変数としてセットすることで、`rustc`コマンドにオプションを追加することができます。
+```
+$ RUSTFLAGS="-C link-args=-Tlink.ld" cargo build --target thumbv7em-none-eabihf
+   Compiling bookos v0.1.0 (/home/garasubo/workspace/bookos)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.15s
+```
+
+さて、毎回このオプションを渡すのは少々面倒くさいです。`.cargo/config`というファイルをつくっておくと、デフォルトのパラメータをセットできます。詳しくは[公式のドキュメント](https://doc.rust-lang.org/cargo/reference/config.html)を参照してください。
+
+```
+[target.thumbv7em-none-eabihf]
+rustflags = [
+    "-C", "link-arg=-Tlink.ld",
+]
+
+[build]
+target = "thumbv7em-none-eabihf"
+```
+こうしておけば単に`cargo build`とすれば前の様々なオプションをつけたコマンドと同じ結果が得られるはずです。
+
+
+## プログラムをボードで実行する
+
+
+
+## いざ、Hello World
+さて、Hello Worldしましょう
