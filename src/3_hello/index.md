@@ -34,7 +34,7 @@ OSのないベアメタル環境ではどのように自分の実行したいプ
 このvector tableですが、どこに置かれるべきかはチップの実装依存となっているため、今回はSTM32F42xxxのリファレンスマニュアルを見る必要があります。
 2.4 Boot configurationの章を見てみましょう。本来であれば0番地がコードの最初のエリアになるのですが、設定によってこれを変更できることがかてあります。
 `BOOT0`と`BOOT1`の値で制御されるのですが、Nucleoボードのユーザーマニュアルによるとどうやらデフォルト値はともに0のようなので、メインのフラッシュメモリから読み出されることになります。
-このフラッシュメモリのアドレスはというとSTMのリファレンスマニュアル3.3章の表に`0x800_0000`番地から始まる、とかいてあるので、ここにvector tableを配置してあげれば自分のプログラムを実行できるといことになりそうです。
+このフラッシュメモリのアドレスはというとSTMのリファレンスマニュアル3.4章の表に`0x800_0000`番地から始まる、とかいてあるので、ここにvector tableを配置してあげれば自分のプログラムを実行できるといことになりそうです。
 このフラッシュメモリ領域がいわゆるROMの領域で、ここに自分のプログラムを書き込んであげることになります。
 
 ## no_std環境下でのRust
@@ -177,8 +177,117 @@ target = "thumbv7em-none-eabihf"
 
 
 ## プログラムをボードで実行する
+ここで一度ボードにプログラムを書き込んであげたいと思います。
+まずは、`link.ld`の中のアドレスを修正するところから始めます。STMのリファレンスマニュアルの3.4章によるとFLASHの領域は`0x800_0000`から`0x81f_ffff`までの2MB領域に広がっていることがわかります。
+RAM領域はリファレンスマニュアルの2.3.1を見ると`0x2000_0000`から256KBの領域にあるとわかります。よって、以下のように書き換えましょう。
+```
+MEMORY
+{
+  FLASH : ORIGIN = 0x08000000, LENGTH = 2M
+  RAM : ORIGIN = 0x20000000, LENGTH = 256K
+}
+```
+書き換えたら再度`cargo build`しましょう。
 
+プログラムをフラッシュROMに書き込むにはST-Linkというこのボードに内蔵されたデバッグ用インターフェースを利用することで可能です。
+ボードには2つmicro USBの端子がついていると思いますが、切れ込みで別れた小さいエリアについている方の端子（CN1）がST-Linkと通信するための端子です。
+PC側はこのインターフェースを利用するために[Open OCD](http://openocd.org/)を使います。Ubuntuであれば`apt`コマンド経由でインストールできます。
+```
+IMAGE=target/thumbv7em-none-eabihf/debug/bookos openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x.cfg -c "init; reset halt; flash write_image erase $IMAGE; verify_image $IMAGE; reset; shutdown"
+```
+`-f`オプションでデフォルトで用意された設定ファイルを利用することができます。`-c`オプションでコマンドを実行しています。このコマンドでボードを初期化した後、`$IMAGE`で指定されたファイルを書き込んだ後、ちゃんと書き込めたかの確認もしています。
+`cargo build`で生成されたバイナリは`target/<アーキテクチャ名>/debug/<アプリケーション名>`にあります。
+しかし、もとのプログラムが無限ループするだけで何もしていないプログラムのため、これでは動いているかどうかすらよくわかりません。
+そこで、デバッガを利用することでどのようにプログラムが動いているか覗いてみましょう。デバッガは`GDB`を利用します。
+GDBには別の環境で動いているプログラムと通信してデバッグする機能があります。Open OCDはGDBと通信するためのサーバーとしての機能もあります。
+ターミナルを2つ開いて、片方のターミナルでは
+```
+openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x.cfg
+```
+を実行しておくとこれがGDBのサーバーとなります。
+別のターミナルで
+```
+gdb-multiarch target/thumbv7em-none-eabihf/debug/bookos
+```
+を実行するとGDBが立ち上がりますが、この状態ではまだサーバーとは通信していません。`target remote`コマンドでサーバーを指定したのち、プログラムを読み込んでみましょう。
+```
+(gdb) target remote :3333
+Remote debugging using :3333
+0x00000000 in ?? ()
+(gdb) load
+Loading section .vector_table, size 0x4 lma 0x8000000
+Start address 0x0, load size 4
+Transfer rate: 7 bytes/sec, 4 bytes/write.
+(gdb) break Reset
+Breakpoint 1 at 0x800000c: file src/main.rs, line 13.
+```
+これでReset関数にブレークポイントが仕掛けられました。
+あとは普通にステップ実行できます。
+```
+(gdb) continue
+Continuing.
+Note: automatically using hardware breakpoints for read-only addresses.
+
+Breakpoint 1, Reset () at src/main.rs:13
+13	    let _x = 42;
+(gdb) step
+16	    loop {}
+(gdb) 
+^C
+Program received signal SIGINT, Interrupt.
+0xe7ff9000 in ?? ()
+```
+最後は無限ループになっているので、強制的に止めました。
 
 
 ## いざ、Hello World
-さて、Hello Worldしましょう
+プログラムは書き込めたのでHello Worldを出力していきたいと思います。
+しかし、今回のボードにはディスプレイはついていません。どこにこの文字を出力すればいいのでしょうか。
+一般的に、このような組込みボードと通信するインターフェースとしてUARTというモジュールがあります。これを使えばPCとマイコン間で比較的簡単に通信ができます。
+しかし、今回はこれを使わずもっと手軽なセミホスティングというデバッガを介した出力でこれをやろうと思います。
+この方法はあくまでデバッグ用の機能なので、デバッガをつけられない実際の製品版で用いることはできず、UARTと比べるとかなり通信速度は遅いのですが、
+今回の目的はあくまでプログラムがちゃんと動作しているかの確認のためのHello Worldなので、セミホスティングを使うことにしましょう。
+このセミホスティングの機能を全部理解するのも大変なので、今回は既存のライブラリを使ってしまいましょう。
+RustのEmbeddedワーキンググループの提供しているクレートである`cortex-m-semihosting`を使います。
+`Cargo.toml`の`dependency`としてこのクレートを追加します。
+```
+[dependencies]
+cortex-m-semihosting = "0.3.5"
+```
+その後、`src/main.rs`内のReset関数を以下のように書き換えます。
+
+```
+use cortex_m_semihosting::hprintln;
+
+#[no_mangle]
+pub unsafe extern "C" fn Reset() -> ! {
+    hprintln!("Hello World").unwrap();
+
+    loop {}
+}
+```
+これでビルドをしてみると、リンクのところで失敗してしまいます。
+```
+$ cargo build
+...
+  = note: rust-lld: error: no memory region specified for section '.rodata'
+          rust-lld: error: no memory region specified for section '.bss'
+          
+
+error: aborting due to previous error
+
+error: Could not compile `bookos`.
+
+To learn more, run the command again with --verbose.
+```
+`.rodata`と`.bss`セクションがないと言われています。ざっくり説明すると`.rodata`は定数を保存しておく領域、`.bss`は初期値が0のグローバル変数を保存する領域です。
+これ以外にも`.data`という初期値が0でないグローバル変数のための領域も実は定義をサボってきました。
+これらのセクションはリンカースクリプトで定義しないといけないのはもちろんなのですが、これをちゃんとプログラムで使うためにはいくつか処理をする必要があります。
+`.bss`セクションは書き換えの必要があるため、RAM領域に配置されるのですが、RAM領域の初期値が0である保証はないのでこれを0にプログラム側で初期化してあげる必要があります。
+`.data`セクションは初期値がROM領域にあって実際の変数はRAM領域に配置されることになるので、ROM領域の初期値をRAM領域側にコピーする必要があります。
+`.rodata`はリードオンリーなので何もしなくて大丈夫です。
+
+
+
+## 
+
