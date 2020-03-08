@@ -286,8 +286,63 @@ To learn more, run the command again with --verbose.
 `.bss`セクションは書き換えの必要があるため、RAM領域に配置されるのですが、RAM領域の初期値が0である保証はないのでこれを0にプログラム側で初期化してあげる必要があります。
 `.data`セクションは初期値がROM領域にあって実際の変数はRAM領域に配置されることになるので、ROM領域の初期値をRAM領域側にコピーする必要があります。
 `.rodata`はリードオンリーなので何もしなくて大丈夫です。
+Embedonomiconと同様にReset関数の先頭で以下のような処理をしておきましょう。
 
+```
+use core::ptr;
 
+pub unsafe extern "C" fn Reset() -> ! {
+    extern "C" {
+        static mut _sbss: u8;
+        static mut _ebss: u8;
+        static mut _sdata: u8;
+        static mut _edata: u8;
+    }
+
+    let count = &_ebss as *const u8 as usize - &_sbss as *const u8 as usize;
+    ptr::write_bytes(&mut _sbss as *mut u8, 0, count);
+
+    let count = &_edata as *const u8 as usize - &_sdata as *const u8 as usize;
+    ptr::copy_nonoverlapping(&_sidata as *const u8, &mut _sdata as *mut u8, count);
+...
+```
+
+`link.ld`は以下のようなセクションを加えます。
+```
+SECTIONS
+{
+...
+
+  .rodata :
+  {
+      *(.rodata .rodata.*);
+  } > FLASH
+
+  .bss (NOLOAD):
+  {
+    _sbss = .;
+    *(.bss .bss.*);
+    _ebss = .;
+  } > RAM
+
+  .data : AT(ADDR(.rodata) + SIZEOF(.rodata))
+  {
+    _sdata = .;
+    *(.data .data.*);
+    _edata = .;
+  } > RAM
+
+  _sidata = LOADADDR(.data);
+
+  /DISCARD/ :
+...
+
+```
+
+link.ldで定義した定数をReset関数で`extern C`で読み込んで使っています。
+まず`_sbss`から`_ebss`の領域を`ptr::write_bytes`で0で初期化します。
+次に`.data`の初期値は`_sidata`の値から始まるROM領域に存在しますが、プログラム上の配置は`_sdata`から始まるRAM領域です。
+これを`ptr::copy_nonoverlapping`でコピーします
 
 ## 
 
