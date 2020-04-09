@@ -179,12 +179,14 @@ target = "thumbv7em-none-eabihf"
 ## プログラムをボードで実行する
 ここで一度ボードにプログラムを書き込んであげたいと思います。
 まずは、`link.ld`の中のアドレスを修正するところから始めます。STMのリファレンスマニュアルの3.4章によるとFLASHの領域は`0x800_0000`から`0x81f_ffff`までの2MB領域に広がっていることがわかります。
-RAM領域はリファレンスマニュアルの2.3.1を見ると`0x2000_0000`から256KBの領域にあるとわかります。よって、以下のように書き換えましょう。
+RAM領域はリファレンスマニュアルの2.3.1を見ると`0x2000_0000`から256KBの領域にあるとわかります。
+しかし、STMのデータシートの方を3.6章を見ると、64KBはcore coupled memoryで使うことができず、5章のメモリマップを見ると`0x2003_0000`以降の領域は使えないことがわかります。
+よって、以下のように書き換えましょう。
 ```
 MEMORY
 {
   FLASH : ORIGIN = 0x08000000, LENGTH = 2M
-  RAM : ORIGIN = 0x20000000, LENGTH = 256K
+  RAM : ORIGIN = 0x20000000, LENGTH = 192K
 }
 ```
 書き換えたら再度`cargo build`しましょう。
@@ -295,6 +297,7 @@ pub unsafe extern "C" fn Reset() -> ! {
     extern "C" {
         static mut _sbss: u8;
         static mut _ebss: u8;
+        static mut _sidata: u8;
         static mut _sdata: u8;
         static mut _edata: u8;
     }
@@ -341,8 +344,21 @@ SECTIONS
 
 link.ldで定義した定数をReset関数で`extern C`で読み込んで使っています。
 まず`_sbss`から`_ebss`の領域を`ptr::write_bytes`で0で初期化します。
-次に`.data`の初期値は`_sidata`の値から始まるROM領域に存在しますが、プログラム上の配置は`_sdata`から始まるRAM領域です。
-これを`ptr::copy_nonoverlapping`でコピーします
+次に`.data`の初期値は`_sidata`の値から始まるROM領域に存在しますがROM領域にはプログラムでは書き換え不能なので、プログラム上の配置は`_sdata`から始まるRAM領域になっています。
+これを`ptr::copy_nonoverlapping`でコピーします。
 
-## 
+さて、これで今度はcargo buildでのコンパイルが通るはずです。
+さっきと同様に、Open OCDとGDBを立ち上げてプログラムを実行すると、Open OCD側にHello Worldが出現するのが期待される結果ですが、そのためにはOpen OCDのセミホスティング機能を有効化する必要があります。
+GDBを立ち上げ`target remote :3333`を実行したあとに、
+```
+(gdb) monitor arm semihosting enable
+```
+というコマンドを実行してから、`continue`を実行してプログラムを再開すると、以下のようにOpen OCD側にHello Worldが出力されるはずです。
+```
+...
+xPSR: 0x01000000 pc: 0x08000008 msp: 0x2001c000
+in procedure 'arm'
+semihosting is enabled
+Hello World
 
+```

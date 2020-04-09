@@ -37,4 +37,8 @@ Arm v7-Mの仕様に基づいたアーキテクチャであるCortex-M4のマニ
 - [STM32F42xxxのリファレンスマニュアル](https://www.stmcu.jp/design/document/reference_manual/51544/)
 今回使うボードのCPUのペリフェラル（周辺機器）の仕様書です。例えばLEDを光らせるにはGPIOというペリフェラルから信号を送るのですが、そういうものの使い方が知りたい場合はこのマニュアルを基本的に読むことになります。
 
+- [STM32F429xxのデータシート](https://www.st.com/resource/en/datasheet/stm32f429zi.pdf)
+CPUについての詳細です。CPUの仕様はリファレンスマニュアルだけでなく、こちらのデータシートも併せて読むことになります。
+
+
 - [Nucleo-144ボードのユーザーマニュアル ()](https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html)
