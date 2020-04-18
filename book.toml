@@ -3,4 +3,4 @@ authors = ["garasubo"]
 language = "ja"
 multilingual = false
 src = "src"
-title = "ウェブプログラマーのためのRustで始める自作OS入門"
+title = "Rustで始める自作組込みOS入門"

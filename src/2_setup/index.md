@@ -41,4 +41,5 @@ Arm v7-Mの仕様に基づいたアーキテクチャであるCortex-M4のマニ
 CPUについての詳細です。CPUの仕様はリファレンスマニュアルだけでなく、こちらのデータシートも併せて読むことになります。
 
 
-- [Nucleo-144ボードのユーザーマニュアル ()](https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html)
+- [Nucleo-144ボードのユーザーマニュアル](https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html)
+ボードそのものについてのドキュメントです。どの端子やピンがどうCPUに結びついているかなどの使い方を調べるために使います。
