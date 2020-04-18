@@ -1,0 +1,533 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>ベアメタルでHello World - Rustで始める自作組込みOS入門</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html" class="active"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Rustで始める自作組込みOS入門</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#ベアメタルでhello-world" id="ベアメタルでhello-world">ベアメタルでHello World</a></h1>
+<p>この章の内容は<a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a>にちょっと詳しい解説をつけただけです。すでにこちらのドキュメントを読んでいるのであればこの章は飛ばして次の章に進んでください。</p>
+<h2><a class="header" href="#プロジェクトのセットアップ" id="プロジェクトのセットアップ">プロジェクトのセットアップ</a></h2>
+<p><code>rustup</code>でRustコマンドをインストールすると<code>cargo</code>というコマンドが使えるようになります。
+このコマンドはRust標準のビルドシステム兼パッケージマネージャーです。</p>
+<p>まずはOS用の新規プロジェクトをつくりましょう。今回のプロジェクト名は<code>bookos</code>で行きます。もし自分の気に入ったプロジェクト名があれば、それでも構いません。</p>
+<pre><code>$ cargo new bookos
+     Created binary (application) `bookos` package
+$ cd bookos
+$ ls
+Cargo.toml  src
+$ ls src
+main.rs
+</code></pre>
+<p><code>src/main.rs</code>をこれから書き換えてHello Worldするプログラムを書いていきます。
+その前に、このプロジェクトでつかうRustのバージョンを指定するために<code>rust-toolchain</code>というファイルをこのプロジェクトにおいておきます。</p>
+<pre><code>$ echo &quot;nightly-2019-09-19&quot; &gt; rust-toolchain
+</code></pre>
+<p>このファイルがプロジェクトのトップディレクトリにあることで、rustupにどのバージョンのRustを使えばいいかを自動的に教えて、バージョンを切り替えてくれるようになります。</p>
+<h2><a class="header" href="#プログラムの実行" id="プログラムの実行">プログラムの実行</a></h2>
+<p>OSのある環境下では、たとえばターミナルから実行コマンドを打つことでOSがプログラムをロードして実行してくれますが、
+OSのないベアメタル環境ではどのように自分の実行したいプログラムを実行すればいいのでしょうか？
+電源投入時のCPUの動作について、ARMv7-MのアーキテクチャリファレンスマニュアルのB1.5.5　Reset behaviorに書いてあります。
+この疑似コードによると、最後に<code>tmp</code>と<code>0xFFFF_FFFE</code>のandを取った値にブランチする、つまり<code>tmp</code>の値の最下位ビットを0にしたメモリアドレス上に置かれたプログラムが実行される、ということのようです。
+この<code>tmp</code>は<code>vectortable</code>+4の値になるようですが、この<code>vectortable</code>の説明はB1.5.3にあります。Vector tableは例外が発生したときにどのアドレスにジャンプするべきかを指す配列です。
+先頭エントリーはリセット時のスタックポインタの値になるので、4バイト先のエントリがリセット時に飛ぶべきアドレスとなっています。
+このvector tableですが、どこに置かれるべきかはチップの実装依存となっているため、今回はSTM32F42xxxのリファレンスマニュアルを見る必要があります。
+2.4 Boot configurationの章を見てみましょう。本来であれば0番地がコードの最初のエリアになるのですが、設定によってこれを変更できることがかてあります。
+<code>BOOT0</code>と<code>BOOT1</code>の値で制御されるのですが、Nucleoボードのユーザーマニュアルによるとどうやらデフォルト値はともに0のようなので、メインのフラッシュメモリから読み出されることになります。
+このフラッシュメモリのアドレスはというとSTMのリファレンスマニュアル3.4章の表に<code>0x800_0000</code>番地から始まる、とかいてあるので、ここにvector tableを配置してあげれば自分のプログラムを実行できるといことになりそうです。
+このフラッシュメモリ領域がいわゆるROMの領域で、ここに自分のプログラムを書き込んであげることになります。</p>
+<h2><a class="header" href="#no_std環境下でのrust" id="no_std環境下でのrust">no_std環境下でのRust</a></h2>
+<p>自分のプログラムをボード上で実行させる方法がなんとなくわかったと思いますが、問題はどうやったらこのフォーマットに従ったプログラムをRustで書いてバイナリにすればいいか、です。
+それを解説したのがThe Embednomiconだったわけです。</p>
+<p>通常、Rustのプログラムを書くときstdクーレートと呼ばれる言語の標準ライブラリを利用してプログラムをコンパイルすることになります。
+しかし、このstdクレートは様々なOSの機能を利用することを前提として実装されているので、OSのないベアメタル環境下では当然動きません。
+また、コンパイルしたときのフォーマットもOS上で実行するためのフォーマットになっているので、それも変更しなければなりません。
+前者の問題を解決するための手段が<code>#![no_std]</code>アトリビュートです。これを使うとstdクレートの代わりに、OSの存在なしでも利用できる機能を提供する<code>core</code>クレートを使ってプログラムをコンパイルしてくれます。</p>
+<p>では、no_stdでの最小プログラムをThe Embednomiconから引用します。</p>
+<pre><code>#![no_main]
+#![no_std]
+
+use core::panic::PanicInfo;
+
+#[panic_handler]
+fn panic(_panic: &amp;PanicInfo&lt;'_&gt;) -&gt; ! {
+    loop {}
+}
+</code></pre>
+<p><code>#![no_main]</code>というアトリビュートがついていて、main関数がないこと、<code>#[panic_handler]</code>というアトリビュートがついた<code>panic</code>関数が存在することが普通のプログラムとは異なっています。
+<code>main</code>関数が通常であれば最初に実行されるプログラムとなるのですが、これもOSが存在して事前準備をしてくれることを前提としたものになっています。
+<code>main</code>関数に相当するレイヤーは後々つくっていくことになりますが、今回は最小の、なので省略です。
+代わりにパニック時の動作についてはきちんと指定する必要があります。例えば<code>Option</code>の<code>None</code>に対して<code>unwrap</code>を呼び出すと通常のプログラムならば異常終了するはずですが、OSのないベアメタル環境ではこの異常終了時の動作を定義してあげる必要があります。
+これが<code>#![panic_handler]</code>アトリビュートがついている<code>panic</code>関数、というわけです。今回は単に無限ループさせるだけですね。</p>
+<p>このプログラムをビルドしてみましょう。
+普通にビルドしてしまうと、実行しているPC向けのバイナリをつくってしまいますので、ターゲットを指定してあげる必要があります。</p>
+<pre><code>$ cargo build --target thumbv7em-none-eabihf
+   Compiling bookos v0.1.0 (/home/garasubo/workspace/bookos)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.25s
+</code></pre>
+<p><code>thumb</code>というのはArmの命令セットの名前で、命令長が16ビットになっているという特徴があります。ARM命令と呼ばれる命令セットも存在してそちらは命令長が32ビットなのですが、ARMv7-Mではこちらはサポートされていません。
+後ろの<code>hf</code>というのはハードウェアの浮動小数点演算器が存在することをしてしています。一部のARMv7-Mのチップでは浮動小数点演算器がないことがあり、コンパイラでそれらをソフトウェア演算にしなければならないことがあります。
+もっとも、今回は浮動小数点の絡む処理を書く予定はないので、間違えてつけなくても（あるいは違うボードを使っていて浮動小数点演算器がないにもかかわらず<code>hf</code>をつけたとしても）問題にはならないでしょう。</p>
+<h2><a class="header" href="#vector-tableを定義する" id="vector-tableを定義する">Vector tableを定義する</a></h2>
+<p>stdが使えない問題はクリアしましたが、まだなにもプログラムが実行できない状態なのでこれを解決していきましょう。
+このArmマイコンではVector tableに従って最初に実行されるプログラムが決定されることがマニュアルからわかっているので、このVector tableを組み込んだプログラムをコンパイルできるようにすればこの問題は解決できます。
+プログラムをコンパイルしたとき、各関数や変数がどのようなフォーマットでバイナリとして配置されるかを定義するにはリンカースクリプトというものを使います。
+これはC言語など他の言語でベアメタルプログラミングするときも使うものです。
+The Embednomiconの2.Memory layoutの章で使われているリンカースクリプトを見てみましょう。このリンカスクリプトは<code>link.ld</code>としてプロジェクトのトップディレクトリにおいておきましょう。</p>
+<pre><code>* Memory layout of the LM3S6965 microcontroller */
+/* 1K = 1 KiBi = 1024 bytes */
+MEMORY
+{
+  FLASH : ORIGIN = 0x00000000, LENGTH = 256K
+  RAM : ORIGIN = 0x20000000, LENGTH = 64K
+}
+
+/* The entry point is the reset handler */
+ENTRY(Reset);
+
+EXTERN(RESET_VECTOR);
+
+SECTIONS
+{
+  .vector_table ORIGIN(FLASH) :
+  {
+    /* First entry: initial Stack Pointer value */
+    LONG(ORIGIN(RAM) + LENGTH(RAM));
+
+    /* Second entry: reset vector */
+    KEEP(*(.vector_table.reset_vector));
+  } &gt; FLASH
+
+  .text :
+  {
+    *(.text .text.*);
+  } &gt; FLASH
+
+  /DISCARD/ :
+  {
+    *(.ARM.exidx .ARM.exidx.*);
+  }
+}
+</code></pre>
+<p><code>MEMORY</code>というのがマイコンのメモリのレイアウトを記述するセクションになっていて、<code>SECTIONS</code>でプログラムをそのメモリにどう配置するかを定義しています。
+<code>MEMORY</code>の中身はハードウェア依存で、本書で使っているマイコンのレイアウトとは異なるので、あとで修正する必要があります。
+<code>.vector_table</code>というのがVector tableを配置するところです。<code>FLASH</code>の先頭に置くようにしています。
+一番最初のエントリーはスタックポインタのアドレスの初期値を格納する必要があります。
+次のエントリーはリセット時に呼び出される関数へのアドレスになっています。これをRust側で定義してあげればいいというわけですね。
+このスクリプトではRAM領域の末尾を指定してます。スタックポインタは末尾から先頭に向かって伸びていくので、通常は利用可能なRAM領域の末尾をしてしておけばよいでしょう。
+<code>.text</code>セクションが実際のプログラムを置く場所です。
+<code>.ARM.exidx</code>は標準ライブラリでのみ利用するセクションなので破棄するように指示しています。</p>
+<p>では、<code>reset_vector</code>を定義してあげるところを引用します。</p>
+<pre><code>// The reset vector, a pointer into the reset handler
+#[link_section = &quot;.vector_table.reset_vector&quot;]
+#[no_mangle]
+pub static RESET_VECTOR: unsafe extern &quot;C&quot; fn() -&gt; ! = Reset;
+</code></pre>
+<p><code>#[link_section = &quot;.vector_table.reset_vector&quot;]</code>というアトリビュートで、メモリ上の配置をしてあげることができます。
+<code>RESET_VECTOR</code>という変数をそこにおいてあげるというわけですが、これが<code>Reset</code>関数への関数ポインタになっています。
+<code>extern &quot;C&quot;</code>というのがついていると思いますが、これはC言語の関数と同じ形式で呼び出せるようにするというものです。
+関数の型ですが、<code>() -&gt; !</code>となっています。この返り値の<code>!</code>というのはこの関数を実行したら決して終了することはない、ということを意味しています。
+C言語の関数とRustの関数はコンパイルしたときにフォーマットが異なり、C言語形式でないとマイコンはそこにジャンプしてそのまま実行ということができません。
+<code>#[no_mangle]</code>というアトリビュートもついています。Rustでコンパイルしたとき、変数や関数の名前はリンカースクリプト内では別の名前（シンボル）に置き換えられるマングリングという処理が行われます。これを防ぐのがこのアトリビュートの役割です。
+しかし、今回はこの変数を直接指定するということをしていないので、なくても動くでしょう。</p>
+<p>あとは<code>Reset</code>関数を定義すれば完成です。</p>
+<pre><code>#[no_mangle]
+pub unsafe extern &quot;C&quot; fn Reset() -&gt; ! {
+    let _x = 42;
+
+    // can't return so we go into an infinite loop here
+    loop {}
+}
+</code></pre>
+<p>さて、上述のリンカスクリプトを使うためには、コンパイル時にオプションとして渡してあげる必要があります。
+<code>RUSTFLAGS</code>を環境変数としてセットすることで、<code>rustc</code>コマンドにオプションを追加することができます。</p>
+<pre><code>$ RUSTFLAGS=&quot;-C link-args=-Tlink.ld&quot; cargo build --target thumbv7em-none-eabihf
+   Compiling bookos v0.1.0 (/home/garasubo/workspace/bookos)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.15s
+</code></pre>
+<p>さて、毎回このオプションを渡すのは少々面倒くさいです。<code>.cargo/config</code>というファイルをつくっておくと、デフォルトのパラメータをセットできます。詳しくは<a href="https://doc.rust-lang.org/cargo/reference/config.html">公式のドキュメント</a>を参照してください。</p>
+<pre><code>[target.thumbv7em-none-eabihf]
+rustflags = [
+    &quot;-C&quot;, &quot;link-arg=-Tlink.ld&quot;,
+]
+
+[build]
+target = &quot;thumbv7em-none-eabihf&quot;
+</code></pre>
+<p>こうしておけば単に<code>cargo build</code>とすれば前の様々なオプションをつけたコマンドと同じ結果が得られるはずです。</p>
+<h2><a class="header" href="#プログラムをボードで実行する" id="プログラムをボードで実行する">プログラムをボードで実行する</a></h2>
+<p>ここで一度ボードにプログラムを書き込んであげたいと思います。
+まずは、<code>link.ld</code>の中のアドレスを修正するところから始めます。STMのリファレンスマニュアルの3.4章によるとFLASHの領域は<code>0x800_0000</code>から<code>0x81f_ffff</code>までの2MB領域に広がっていることがわかります。
+RAM領域はリファレンスマニュアルの2.3.1を見ると<code>0x2000_0000</code>から256KBの領域にあるとわかります。
+しかし、STMのデータシートの方を3.6章を見ると、64KBはcore coupled memoryで使うことができず、5章のメモリマップを見ると<code>0x2003_0000</code>以降の領域は使えないことがわかります。
+よって、以下のように書き換えましょう。</p>
+<pre><code>MEMORY
+{
+  FLASH : ORIGIN = 0x08000000, LENGTH = 2M
+  RAM : ORIGIN = 0x20000000, LENGTH = 192K
+}
+</code></pre>
+<p>書き換えたら再度<code>cargo build</code>しましょう。</p>
+<p>プログラムをフラッシュROMに書き込むにはST-Linkというこのボードに内蔵されたデバッグ用インターフェースを利用することで可能です。
+ボードには2つmicro USBの端子がついていると思いますが、切れ込みで別れた小さいエリアについている方の端子（CN1）がST-Linkと通信するための端子です。
+PC側はこのインターフェースを利用するために<a href="http://openocd.org/">Open OCD</a>を使います。Ubuntuであれば<code>apt</code>コマンド経由でインストールできます。</p>
+<pre><code>IMAGE=target/thumbv7em-none-eabihf/debug/bookos openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x.cfg -c &quot;init; reset halt; flash write_image erase $IMAGE; verify_image $IMAGE; reset; shutdown&quot;
+</code></pre>
+<p><code>-f</code>オプションでデフォルトで用意された設定ファイルを利用することができます。<code>-c</code>オプションでコマンドを実行しています。このコマンドでボードを初期化した後、<code>$IMAGE</code>で指定されたファイルを書き込んだ後、ちゃんと書き込めたかの確認もしています。
+<code>cargo build</code>で生成されたバイナリは<code>target/&lt;アーキテクチャ名&gt;/debug/&lt;アプリケーション名&gt;</code>にあります。
+しかし、もとのプログラムが無限ループするだけで何もしていないプログラムのため、これでは動いているかどうかすらよくわかりません。
+そこで、デバッガを利用することでどのようにプログラムが動いているか覗いてみましょう。デバッガは<code>GDB</code>を利用します。
+GDBには別の環境で動いているプログラムと通信してデバッグする機能があります。Open OCDはGDBと通信するためのサーバーとしての機能もあります。
+ターミナルを2つ開いて、片方のターミナルでは</p>
+<pre><code>openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x.cfg
+</code></pre>
+<p>を実行しておくとこれがGDBのサーバーとなります。
+別のターミナルで</p>
+<pre><code>gdb-multiarch target/thumbv7em-none-eabihf/debug/bookos
+</code></pre>
+<p>を実行するとGDBが立ち上がりますが、この状態ではまだサーバーとは通信していません。<code>target remote</code>コマンドでサーバーを指定したのち、プログラムを読み込んでみましょう。</p>
+<pre><code>(gdb) target remote :3333
+Remote debugging using :3333
+0x00000000 in ?? ()
+(gdb) load
+Loading section .vector_table, size 0x4 lma 0x8000000
+Start address 0x0, load size 4
+Transfer rate: 7 bytes/sec, 4 bytes/write.
+(gdb) break Reset
+Breakpoint 1 at 0x800000c: file src/main.rs, line 13.
+</code></pre>
+<p>これでReset関数にブレークポイントが仕掛けられました。
+あとは普通にステップ実行できます。</p>
+<pre><code>(gdb) continue
+Continuing.
+Note: automatically using hardware breakpoints for read-only addresses.
+
+Breakpoint 1, Reset () at src/main.rs:13
+13	    let _x = 42;
+(gdb) step
+16	    loop {}
+(gdb) 
+^C
+Program received signal SIGINT, Interrupt.
+0xe7ff9000 in ?? ()
+</code></pre>
+<p>最後は無限ループになっているので、強制的に止めました。</p>
+<h2><a class="header" href="#いざhello-world" id="いざhello-world">いざ、Hello World</a></h2>
+<p>プログラムは書き込めたのでHello Worldを出力していきたいと思います。
+しかし、今回のボードにはディスプレイはついていません。どこにこの文字を出力すればいいのでしょうか。
+一般的に、このような組込みボードと通信するインターフェースとしてUARTというモジュールがあります。これを使えばPCとマイコン間で比較的簡単に通信ができます。
+しかし、今回はこれを使わずもっと手軽なセミホスティングというデバッガを介した出力でこれをやろうと思います。
+この方法はあくまでデバッグ用の機能なので、デバッガをつけられない実際の製品版で用いることはできず、UARTと比べるとかなり通信速度は遅いのですが、
+今回の目的はあくまでプログラムがちゃんと動作しているかの確認のためのHello Worldなので、セミホスティングを使うことにしましょう。
+このセミホスティングの機能を全部理解するのも大変なので、今回は既存のライブラリを使ってしまいましょう。
+RustのEmbeddedワーキンググループの提供しているクレートである<code>cortex-m-semihosting</code>を使います。
+<code>Cargo.toml</code>の<code>dependency</code>としてこのクレートを追加します。</p>
+<pre><code>[dependencies]
+cortex-m-semihosting = &quot;0.3.5&quot;
+</code></pre>
+<p>その後、<code>src/main.rs</code>内のReset関数を以下のように書き換えます。</p>
+<pre><code>use cortex_m_semihosting::hprintln;
+
+#[no_mangle]
+pub unsafe extern &quot;C&quot; fn Reset() -&gt; ! {
+    hprintln!(&quot;Hello World&quot;).unwrap();
+
+    loop {}
+}
+</code></pre>
+<p>これでビルドをしてみると、リンクのところで失敗してしまいます。</p>
+<pre><code>$ cargo build
+...
+  = note: rust-lld: error: no memory region specified for section '.rodata'
+          rust-lld: error: no memory region specified for section '.bss'
+          
+
+error: aborting due to previous error
+
+error: Could not compile `bookos`.
+
+To learn more, run the command again with --verbose.
+</code></pre>
+<p><code>.rodata</code>と<code>.bss</code>セクションがないと言われています。ざっくり説明すると<code>.rodata</code>は定数を保存しておく領域、<code>.bss</code>は初期値が0のグローバル変数を保存する領域です。
+これ以外にも<code>.data</code>という初期値が0でないグローバル変数のための領域も実は定義をサボってきました。
+これらのセクションはリンカースクリプトで定義しないといけないのはもちろんなのですが、これをちゃんとプログラムで使うためにはいくつか処理をする必要があります。
+<code>.bss</code>セクションは書き換えの必要があるため、RAM領域に配置されるのですが、RAM領域の初期値が0である保証はないのでこれを0にプログラム側で初期化してあげる必要があります。
+<code>.data</code>セクションは初期値がROM領域にあって実際の変数はRAM領域に配置されることになるので、ROM領域の初期値をRAM領域側にコピーする必要があります。
+<code>.rodata</code>はリードオンリーなので何もしなくて大丈夫です。
+Embedonomiconと同様にReset関数の先頭で以下のような処理をしておきましょう。</p>
+<pre><code>use core::ptr;
+
+pub unsafe extern &quot;C&quot; fn Reset() -&gt; ! {
+    extern &quot;C&quot; {
+        static mut _sbss: u8;
+        static mut _ebss: u8;
+        static mut _sidata: u8;
+        static mut _sdata: u8;
+        static mut _edata: u8;
+    }
+
+    let count = &amp;_ebss as *const u8 as usize - &amp;_sbss as *const u8 as usize;
+    ptr::write_bytes(&amp;mut _sbss as *mut u8, 0, count);
+
+    let count = &amp;_edata as *const u8 as usize - &amp;_sdata as *const u8 as usize;
+    ptr::copy_nonoverlapping(&amp;_sidata as *const u8, &amp;mut _sdata as *mut u8, count);
+...
+</code></pre>
+<p><code>link.ld</code>は以下のようなセクションを加えます。</p>
+<pre><code>SECTIONS
+{
+...
+
+  .rodata :
+  {
+      *(.rodata .rodata.*);
+  } &gt; FLASH
+
+  .bss (NOLOAD):
+  {
+    _sbss = .;
+    *(.bss .bss.*);
+    _ebss = .;
+  } &gt; RAM
+
+  .data : AT(ADDR(.rodata) + SIZEOF(.rodata))
+  {
+    _sdata = .;
+    *(.data .data.*);
+    _edata = .;
+  } &gt; RAM
+
+  _sidata = LOADADDR(.data);
+
+  /DISCARD/ :
+...
+
+</code></pre>
+<p>link.ldで定義した定数をReset関数で<code>extern C</code>で読み込んで使っています。
+まず<code>_sbss</code>から<code>_ebss</code>の領域を<code>ptr::write_bytes</code>で0で初期化します。
+次に<code>.data</code>の初期値は<code>_sidata</code>の値から始まるROM領域に存在しますがROM領域にはプログラムでは書き換え不能なので、プログラム上の配置は<code>_sdata</code>から始まるRAM領域になっています。
+これを<code>ptr::copy_nonoverlapping</code>でコピーします。</p>
+<p>さて、これで今度はcargo buildでのコンパイルが通るはずです。
+さっきと同様に、Open OCDとGDBを立ち上げてプログラムを実行すると、Open OCD側にHello Worldが出現するのが期待される結果ですが、そのためにはOpen OCDのセミホスティング機能を有効化する必要があります。
+GDBを立ち上げ<code>target remote :3333</code>を実行したあとに、</p>
+<pre><code>(gdb) monitor arm semihosting enable
+</code></pre>
+<p>というコマンドを実行してから、<code>continue</code>を実行してプログラムを再開すると、以下のようにOpen OCD側にHello Worldが出力されるはずです。</p>
+<pre><code>...
+xPSR: 0x01000000 pc: 0x08000008 msp: 0x2001c000
+in procedure 'arm'
+semihosting is enabled
+Hello World
+
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../2_setup/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../4_interrupt/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../2_setup/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="../4_interrupt/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

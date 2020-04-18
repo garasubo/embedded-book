@@ -1,0 +1,261 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>環境構築 - Rustで始める自作組込みOS入門</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html" class="active"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Rustで始める自作組込みOS入門</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#環境構築" id="環境構築">環境構築</a></h1>
+<p>筆者はUbuntu 18.04で動作確認をしていますが、基本的にはWindowsやMac環境でも構築可能です。</p>
+<h2><a class="header" href="#rust" id="rust">Rust</a></h2>
+<p><code>rustup</code>を使う方法が公式でも全プラットフォーム共通で推薦されているので、これに従います。
+[https://rustup.rs/]の方法に従って、rustupをインストールします。LinuxやMacのようなUnixライクなOSの場合、以下のようにインストールします。</p>
+<pre><code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+</code></pre>
+<p>rustupはRustコンパイラのインストール・アップデートやバージョン管理をしてくれるツールです。
+今回は特に<code>nightly</code>と呼ばれる、いわゆるベータ版のようなRustコンパイラを使うことになるのですが、nightlyと安定版である<code>stable</code>の切り替えもコマンド一つで行えて大変便利です。</p>
+<p>今回はnightlyの2019-09-19のバージョンを使います。以下のようにして<code>nightly-2019-09-18</code>をインストールしましょう。</p>
+<pre><code>rustup install nightly-2019-09-18
+</code></pre>
+<h2><a class="header" href="#使用ボード" id="使用ボード">使用ボード</a></h2>
+<p>STマイクロエレクトロニクス社の<a href="https://www.st.com/ja/evaluation-tools/nucleo-f429zi.html">NUCLEO-F429ZIボード</a>を使用します。
+ただし、この本では多くのペリフェラルは使わないので、ST社のCortex-Mの他のボードでも十分に再現可能かと思われます。</p>
+<h2><a class="header" href="#仕様書ドキュメント" id="仕様書ドキュメント">仕様書・ドキュメント</a></h2>
+<p>低レイヤーシステムは仕様書をちゃんと読み理解する、ということがとても重要になります。
+マイコンボードの種類によっては、仕様書を手に入れるためには面倒な契約を結ぶ必要があるケースもありますが、今回使うNucleoボード及びそのCPUの仕様書はすべてオンラインで入手可能です。
+この本では、実際に仕様書を参照しつつ、OSを書いていきますのでこれらもダウンロードしてください。
+なお、以下のリンクにある仕様書は基本的に英語版です。日本語版もある場合がありますが、最新版ではないため英語版を参照するほうが安全です。</p>
+<ul>
+<li>
+<p><a href="https://developer.arm.com/docs/ddi0403/ed/armv7-m-architecture-reference-manual">Arm®v7-M Architecture Reference Manual</a>
+ボードに乗っているCPUの基本的な仕様書です。アセンブラ命令の解説や、割り込みが発生したときの挙動、システムレジスタの仕様などが書かれています。</p>
+</li>
+<li>
+<p><a href="https://developer.arm.com/docs/100166/0001">ARM Cortex-M4 Processor Technical Reference Manual Revision r0p1 Documentation</a>
+Arm v7-Mの仕様に基づいたアーキテクチャであるCortex-M4のマニュアルです。<a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439cj/index.html">日本語版</a>も多少古いバージョンですが存在します。
+割り込みコントローラやメモリ保護機構などの解説があります。また、Arm v7-Mについても簡単な説明があります。</p>
+</li>
+<li>
+<p><a href="https://www.stmcu.jp/design/document/reference_manual/51544/">STM32F42xxxのリファレンスマニュアル</a>
+今回使うボードのCPUのペリフェラル（周辺機器）の仕様書です。例えばLEDを光らせるにはGPIOというペリフェラルから信号を送るのですが、そういうものの使い方が知りたい場合はこのマニュアルを基本的に読むことになります。</p>
+</li>
+<li>
+<p><a href="https://www.st.com/resource/en/datasheet/stm32f429zi.pdf">STM32F429xxのデータシート</a>
+CPUについての詳細です。CPUの仕様はリファレンスマニュアルだけでなく、こちらのデータシートも併せて読むことになります。</p>
+</li>
+<li>
+<p><a href="https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html">Nucleo-144ボードのユーザーマニュアル</a>
+ボードそのものについてのドキュメントです。どの端子やピンがどうCPUに結びついているかなどの使い方を調べるために使います。</p>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../1_intro/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../3_hello/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../1_intro/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="../3_hello/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
