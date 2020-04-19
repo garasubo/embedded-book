@@ -39,6 +39,185 @@ R15はプログラムカウンタ（PC)で、現在、実行中の命令のメ�
 
 ## SysTickの割り込みハンドラを定義する
 では、SysTickの割り込みハンドラを定義しましょう。今回は割り込みハンドラの中で特に特別なことはせず、適当な文字列をセミホスティングで表示させるだけにしましょう。
+Embedonomiconの4章にあるコードを`main.rs`に貼り付けてそのまま使ってしまいましょう。
+```
+pub union Vector {
+    reserved: u32,
+    handler: unsafe extern "C" fn(),
+}
 
+extern "C" {
+    fn NMI();
+    fn HardFault();
+    fn MemManage();
+    fn BusFault();
+    fn UsageFault();
+    fn SVCall();
+    fn PendSV();
+    fn SysTick();
+}
 
+#[link_section = ".vector_table.exceptions"]
+#[no_mangle]
+pub static EXCEPTIONS: [Vector; 14] = [
+    Vector { handler: NMI },
+    Vector { handler: HardFault },
+    Vector { handler: MemManage },
+    Vector { handler: BusFault },
+    Vector {
+        handler: UsageFault,
+    },
+    Vector { reserved: 0 },
+    Vector { reserved: 0 },
+    Vector { reserved: 0 },
+    Vector { reserved: 0 },
+    Vector { handler: SVCall },
+    Vector { reserved: 0 },
+    Vector { reserved: 0 },
+    Vector { handler: PendSV },
+    Vector { handler: SysTick },
+];
 
+#[no_mangle]
+pub extern "C" fn DefaultExceptionHandler() {
+    loop {}
+}
+```
+
+`extern C`によってSysTick関数やそれ以外の例外ハンドル用の関数を宣言しています。
+これはC言語などで書かれた関数を呼び出すものです。よって、リンクする際にどこかから引っ張ってきてこなければなりません。
+そのため、Embedonomiconでは以下のようなセクションをリンカスクリプトに加えています。
+
+```
+PROVIDE(NMI = DefaultExceptionHandler);
+PROVIDE(HardFault = DefaultExceptionHandler);
+PROVIDE(MemManage = DefaultExceptionHandler);
+PROVIDE(BusFault = DefaultExceptionHandler);
+PROVIDE(UsageFault = DefaultExceptionHandler);
+PROVIDE(SVCall = DefaultExceptionHandler);
+PROVIDE(PendSV = DefaultExceptionHandler);
+PROVIDE(SysTick = DefaultExceptionHandler);
+```
+これは、該当する関数が見つからなかった場合、`DefaultExceptionHandler`を変わりに使うという文になっています。
+さらに、`EXCEPTIONS`を`RESET_VECTOR`直後に置くため、`.vector_table`セクションも以下のように書き換える必要があります。
+
+```
+  .vector_table ORIGIN(FLASH) :
+  {
+    LONG(ORIGIN(RAM) + LENGTH(RAM));
+
+    KEEP(*(.vector_table.reset_vector));
+
+    KEEP(*(.vector_table.exceptions));
+  } > FLASH
+```
+
+これで、とりあえず、ビルドは通りますが、実行しても`SysTick`関数を定義していないので、ただの無限ループである`DefaultExceptionHandler`を使うだけなのでなにもわかりません。
+そのうえ、まだSysTick割り込みを発生させるためのSysTickモジュールの設定もしていないので、これも行う必要があります。
+
+それではまず、SysTick関数を定義しておきましょう。この関数はあとでリンカスクリプトから参照され、割り込みが発生したときC言語の関数呼び出しのように呼ばれるので、
+`DefaultExceptionHandler`と同様に`no_mangle`と`extern "C"`をつけておく必要がある点に注意しましょう。
+```
+#[no_mangle]
+pub extern "C" fn SysTick() {
+    hprintln!("Systick").unwrap();
+}
+```
+
+この関数を定義したあと、先程加えた`extern "C"`で各種例外ハンドル用関数を宣言していたところから`SysTick`の部分を取り除く必要もあります。
+
+## SysTickモジュールを定義する
+SysTickの例外ハンドラが定義できたところで、実際のSysTick例外を発生させるところにチャレンジしましょう。
+ところで、今まですべての関数をすべて`main.rs`に書いてきてしまいました。Embedonmiconではいくつかのサブプロジェクトにわけてクレートとして分離する、という方法をとってコードを整理しています。
+同じようにクレートとして分離するのも悪くないのですが、今回はお手軽にモジュールという形で分離しましょう。
+詳しくは[TPRLの7章](https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html)が参考になると思います。
+このモジュールのシステムは2018 Editionで大きく変更がされているため、いくつかのブログは2015 Editionをベースにしてある場合があることに注意が必要です。
+ただし、後方互換性はあるので、2015 Editionに沿った方法でモジュールを分割しても大きな問題にはなりません。
+
+`src`ディレクトリ以下に`systick.rs`という以下のような関数を含んだファイルをつくりましょう。
+```
+use cortex_m_semihosting::hprintln;
+
+pub fn init() {
+    hprintln!("Systick init").unwrap();
+}
+```
+
+続いて、`main.rs`内の`Reset`関数を以下のように書き換えます。
+`systick`モジュールの宣言と、`systick`モジュール内の`init`関数を呼び出しています。
+```
+mod systick;
+
+#[no_mangle]
+pub unsafe extern "C" fn Reset() -> ! {
+    extern "C" {
+        static mut _sbss: u8;
+        static mut _ebss: u8;
+        static mut _sidata: u8;
+        static mut _sdata: u8;
+        static mut _edata: u8;
+    }
+
+    let count = &_ebss as *const u8 as usize - &_sbss as *const u8 as usize;
+    ptr::write_bytes(&mut _sbss as *mut u8, 0, count);
+
+    let count = &_edata as *const u8 as usize - &_sdata as *const u8 as usize;
+    ptr::copy_nonoverlapping(&_sidata as *const u8, &mut _sdata as *mut u8, count);
+
+    hprintln!("Hello World").unwrap();
+
+    systick::init();
+
+    loop {}
+}
+```
+
+ここまでで一度ビルドして実行すると新たに`Systick init`という文字列が表示されるはずです。
+ここからSysTickに関係するコードはこの`systick.rs`内に書いていき、`systick`モジュールとして`main.rs`から使いましょう。
+
+## SysTickのレジスタを設定する
+SysTickを制御するにはSysTickのレジスタを叩いてあげる必要があります。
+ArmではこのようなモジュールやペリフェラルのレジスタをメモリマップドIOという形で読み書きします。
+プログラム側からは普通のメモリアクセスと同じようにできるという点で便利な仕組みです。
+メモリマップドIOとは、このような外部のデバイスのレジスタをメモリアドレスに割り当てて、メモリアクセスのようにレジスタを読み書きする仕組みです。
+ただし、これらのレジスタの値の読み書きは本物のメモリとは違って例えば、一部のビットが書き込み不可であるアドレスに書き込んだあとすぐに読み込んだら値が一致しないとか、何も書き込んでいないのに時間が立つと値が変わっている、などの現象が発生します。
+そのため、コンパイラが普通のメモリアクセスと同じような最適化をかけてしまうと正しく動作しない場合があります。ここには注意しましょう。
+
+SysTickの詳しい説明はリファレンスマニュアルのB3.3章にまとまっています。
+SysTickを使うにはコントロールレジスタ（CSR）、リロードバリューレジスタ（RVR）、カレントバリューレジスタ（CVR）、キャリブレーションバリューレジスタ（CALIB)の3つを触ることになります。
+CSRはこのSysTickを有効化させたり、割り込み発生をさせるかどうかの制御などをするためのものです。
+CVRは現在のタイマーの値で時間経過とともに値が減っていきます。この値が0になると割り込みを発生させることができます。
+0になったあとはRVRで設定された値になります。つまり、RVRの値が割り込みの周期ということになります。
+さて、このCVRがどのくらい時間で値が減っていくかですが、CALIBレジスタにその値が記されています。
+CALIBには10ミリ秒ごとにどの程度値が減るかの値が設定されるリードオンリーレジスタです。この下位24ビットの値を見てあげれば、RVRやCVRを適切に設定できます。
+これらのレジスタがどこにマップされているかもこのリファレンスマニュアルのB3.3.2章に書かれています。
+
+さて、あとはこれらのレジスタを使うだけです。これらのメモリアドレスにアクセスするには標準ライブラリの`core::ptr`内にある[`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html)と[`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html)を使います。
+volatileというのは揮発性のという意味で、C言語などでは変数の修飾子としてつけることで、その変数へのアクセスの最適化をさせないようにすることができます。
+同様に`read_volatile`や`write_volatile`も最適化によって変更されてほしくないアクセス、つまり今回のようなメモリマップドIOに使える関数です。
+今回は1秒毎に割り込みが発生するように設定してみましょう。`systick.rs`内の`init`関数を以下のように書き換えましょう。
+```
+use cortex_m_semihosting::hprintln;
+use core::ptr::{read_volatile, write_volatile};
+
+const CSR_ADDR: usize = 0xE000_E010;
+const RVR_ADDR: usize = 0xE000_E014;
+const CVR_ADDR: usize = 0xE000_E018;
+const CALIB_ADDR: usize = 0xE000_E01C;
+
+pub fn init() {
+    hprintln!("Systick init").unwrap();
+    unsafe {
+        write_volatile(CVR_ADDR as *mut u32, 0);
+        let calib_val = read_volatile(CALIB_ADDR as *const u32) & 0x00FF_FFFF;
+        write_volatile(RVR_ADDR as *mut u32, calib_val * 100);
+        write_volatile(CSR_ADDR as *mut u32, 0x3);
+    }
+}
+```
+`read_volative`及び`write_volatile`はともに`unsafe`な関数なので`unsafe`ブロックで囲う必要があります。
+なお、アドレスを渡す際に`usize`型をポインタにキャストしている部分がありますが、この操作自体はRustでは安全とされています。
+ただし、このアドレスをいざ読み書きする段階になると、この先にあるアドレスがちゃんとしたものになっているかの保証もないですし、ライフタイムのチェックもないので`unsafe`となるわけです。
+
+さて、これでコンパイルすると、今までのメッセージに加えてSysTickハンドラが1秒毎に呼び出されてメッセージが表示されているはずです。
+また、デバッガで動作を止めると、`Reset`関数自体は最後の無限ループで止まっているのがわかります。
