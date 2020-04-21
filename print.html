@@ -163,11 +163,11 @@ Rustに関してですが、基本的な文法事項などは説明しません�
 <p>オペレーティングシステム（OS）とはそもそもなんでしょうか。これは自作OSをつくるさいに誰もがぶつかる疑問でしょう。
 OSの教科書として有名なMordern Operating Systemの第四版を見てみましょう。</p>
 <blockquote>
-<p>It is hard to pin down what an operating system is other than saying it is the software that runs in kernel mode--and even that is not true.
-カーネルモードという通常よりも権限の強いCPUのモードで動くソフトウェアとくらいしか定義しようがない、そのうえそれすらも正しくないものかもしれない。と言っています。
+<p>It is hard to pin down what an operating system is other than saying it is the software that runs in kernel mode--and even that is not true.</p>
+</blockquote>
+<p>カーネルモードという通常よりも権限の強いCPUのモードで動くソフトウェアとくらいしか定義しようがない、そのうえそれすらも正しくないものかもしれない。と言っています。
 その原因のひとつとして、OSには本質的には関係のない２つの機能を持っているからと書かれています。
 その２つの機能とは、プログラマーのためにきれいなインターフェースを提供するというものと、ハードウェアのリソースを管理するというものです。</p>
-</blockquote>
 <p>順番に見ていきましょう。まず、インターフェースとしての機能です。CPUや付属するデバイスをそのままの形で直接叩くというのは非常に複雑で難しいです。
 例えば、みなさんはプログラミングの一番始めの一歩として「Hello World」などの文字列を出力したと思うのですが、そのとき、「画面に文字を出力する機能」というのは直接実装することはなかったのではないでしょうか？
 この「画面に文字を出力する機能」というものを提供しているのはOSです（厳密にはそのOSの機能を利用する言語の標準ライブラリを使うことが多いでしょう）。
