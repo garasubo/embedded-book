@@ -15,6 +15,7 @@ Rustに関してですが、基本的な文法事項などは説明しません�
 オペレーティングシステム（OS）とはそもそもなんでしょうか。これは自作OSをつくるさいに誰もがぶつかる疑問でしょう。
 OSの教科書として有名なMordern Operating Systemの第四版を見てみましょう。
 > It is hard to pin down what an operating system is other than saying it is the software that runs in kernel mode--and even that is not true.
+
 カーネルモードという通常よりも権限の強いCPUのモードで動くソフトウェアとくらいしか定義しようがない、そのうえそれすらも正しくないものかもしれない。と言っています。
 その原因のひとつとして、OSには本質的には関係のない２つの機能を持っているからと書かれています。
 その２つの機能とは、プログラマーのためにきれいなインターフェースを提供するというものと、ハードウェアのリソースを管理するというものです。
