@@ -22,6 +22,7 @@ STマイクロエレクトロニクス社の[NUCLEO-F429ZIボード](https://www
 ただし、この本では多くのペリフェラルは使わないので、ST社のCortex-Mの他のボードでも十分に再現可能かと思われます。
 
 ## 仕様書・ドキュメント
+### ハードウェア関連
 低レイヤーシステムは仕様書をちゃんと読み理解する、ということがとても重要になります。
 マイコンボードの種類によっては、仕様書を手に入れるためには面倒な契約を結ぶ必要があるケースもありますが、今回使うNucleoボード及びそのCPUの仕様書はすべてオンラインで入手可能です。
 この本では、実際に仕様書を参照しつつ、OSを書いていきますのでこれらもダウンロードしてください。
@@ -43,3 +44,15 @@ CPUについての詳細です。CPUの仕様はリファレンスマニュア�
 
 - [Nucleo-144ボードのユーザーマニュアル](https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html)
 ボードそのものについてのドキュメントです。どの端子やピンがどうCPUに結びついているかなどの使い方を調べるために使います。
+
+### Rust関連
+Rustそのものについてのドキュメントもしっかりと見ていく必要があります。
+まず、Rustに関する知識が一切ない場合、TRPLと呼ばれるチュートリアルを一通り眺めてみるのが良いでしょう。
+- [The Rust Programming Language](https://doc.rust-lang.org/book/)
+- [日本語版](https://doc.rust-jp.rs/book/second-edition/)
+本書ではRustに関する初歩的な構文の知識などには触れないため、もしわからないことがあればこちらを参照してください。
+
+低レイヤーのプログラミングを行うにあたって、Rustの詳細な実装を知る必要がある場面があります。
+そのための本としてThe Rustonomiconというのがあります。
+- [Ther Rustonomicon](https://doc.rust-lang.org/nomicon/index.html)
+こちらは必要になったら参照することになりますが、すべてを理解しておく必要はありません（正直なところ筆者もすべての項目を把握していないです）。
