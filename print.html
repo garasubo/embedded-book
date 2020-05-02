@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -213,6 +213,7 @@ CPUそのものがそういう用途ではないからです。</p>
 <p>STマイクロエレクトロニクス社の<a href="https://www.st.com/ja/evaluation-tools/nucleo-f429zi.html">NUCLEO-F429ZIボード</a>を使用します。
 ただし、この本では多くのペリフェラルは使わないので、ST社のCortex-Mの他のボードでも十分に再現可能かと思われます。</p>
 <h2><a class="header" href="#仕様書ドキュメント" id="仕様書ドキュメント">仕様書・ドキュメント</a></h2>
+<h3><a class="header" href="#ハードウェア関連" id="ハードウェア関連">ハードウェア関連</a></h3>
 <p>低レイヤーシステムは仕様書をちゃんと読み理解する、ということがとても重要になります。
 マイコンボードの種類によっては、仕様書を手に入れるためには面倒な契約を結ぶ必要があるケースもありますが、今回使うNucleoボード及びそのCPUの仕様書はすべてオンラインで入手可能です。
 この本では、実際に仕様書を参照しつつ、OSを書いていきますのでこれらもダウンロードしてください。
@@ -239,6 +240,20 @@ CPUについての詳細です。CPUの仕様はリファレンスマニュア�
 <p><a href="https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html">Nucleo-144ボードのユーザーマニュアル</a>
 ボードそのものについてのドキュメントです。どの端子やピンがどうCPUに結びついているかなどの使い方を調べるために使います。</p>
 </li>
+</ul>
+<h3><a class="header" href="#rust関連" id="rust関連">Rust関連</a></h3>
+<p>Rustそのものについてのドキュメントもしっかりと見ていく必要があります。
+まず、Rustに関する知識が一切ない場合、TRPLと呼ばれるチュートリアルを一通り眺めてみるのが良いでしょう。</p>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-jp.rs/book/second-edition/">日本語版</a>
+本書ではRustに関する初歩的な構文の知識などには触れないため、もしわからないことがあればこちらを参照してください。</li>
+</ul>
+<p>低レイヤーのプログラミングを行うにあたって、Rustの詳細な実装を知る必要がある場面があります。
+そのための本としてThe Rustonomiconというのがあります。</p>
+<ul>
+<li><a href="https://doc.rust-lang.org/nomicon/index.html">Ther Rustonomicon</a>
+こちらは必要になったら参照することになりますが、すべてを理解しておく必要はありません（正直なところ筆者もすべての項目を把握していないです）。</li>
 </ul>
 <h1><a class="header" href="#ベアメタルでhello-world" id="ベアメタルでhello-world">ベアメタルでHello World</a></h1>
 <p>この章の内容は<a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a>にちょっと詳しい解説をつけただけです。すでにこちらのドキュメントを読んでいるのであればこの章は飛ばして次の章に進んでください。</p>
@@ -753,6 +768,9 @@ pub fn init() {
 また、デバッガで動作を止めると、<code>Reset</code>関数自体は最後の無限ループで止まっているのがわかります。</p>
 <h1><a class="header" href="#プロセス切り替え" id="プロセス切り替え">プロセス切り替え</a></h1>
 <p>この章ではOSの要となるプロセスの切り替えを実装します。</p>
+<p>そもそもプロセスとは、実行中のプログラムのことで、OSの中では各プロセスの状態というものを保存することで自由に実行を中断したり実行を再開させるということができます。
+このプロセスの状態というものをプログラムの中で定義してあげて、適切に保存するロジックを実装する、というのがこの章のテーマです。
+今まではただのOSなしでのプログラミング、すなわちベアメタルプログラミングと大した違いはなかったのですが、プロセス切り替えを実現できるとだいぶ雰囲気が変わってくると思います。</p>
 <h2><a class="header" href="#armv7-mのcpuモードについて" id="armv7-mのcpuモードについて">ARMv7-MのCPUモードについて</a></h2>
 <p>OSは一章でも少し説明したように通常のアプリケーションとは異なるCPUのモードで動くことが多いです。
 一般にアプリケーション用のCPUモードだとシステムレジスタへのアクセスが制限されたり、使うレジスタが異なる場合や、一部のメモリにアクセスできなかったりします。
@@ -771,7 +789,164 @@ OSが実行するときはプロセッサの機能がすべて使えるように
 <p>ARMv7-Mではスタックポインタが２種類存在して使い分けることができる、ということは４章でもちらっと言いましたが、ここでちゃんと見てみましょう。
 スタックポインタにはメインとプロセスの２種類存在していて、前述したモードや特権とは独立したパラメータとして設定することができます。
 ただし、ハンドラモードでは常にメインが使われることになります。</p>
+<p>ここで１つ補足しておくと、
+汎用OSが動くようなCPUだと通常、メモリ管理ユニット（MMU）というものが備わっていて、OSと通常のアプリケーションでアクセスできるメモリ領域を制限したり、
+アプリケーション間で異なる物理メモリを同一のアドレスに割り当てるアドレス変換といったことができるのですが、残念ながらARMv7-MにはMMUは備わっていません。
+一応、メモリ保護機構（MPU）というものは備わっていて、これを使うことでアプリケーションがアクセスできるメモリ領域を制限することはできるのですが、本書では扱いません。</p>
 <h2><a class="header" href="#cpuの状態を切り替える" id="cpuの状態を切り替える">CPUの状態を切り替える</a></h2>
+<p>それでは、実際にどのようにプロセスというものを実現するかを考えていきましょう。
+各プロセスはスレッドモードで、OSに干渉しないように非特権状態で、またスタックポインタもプロセスを使うようにしましょう。
+OSは今までどおりスレッドモード・特権状態・スタックポインタはメインを使うようにしましょう。</p>
+<p>状態切り替えの方法としては一度Supervisor call例外（SVCall例外）を発生させてハンドラモードに入って、そのリターン時に切り替えるというのがいいでしょう。
+このSVCall例外は<code>svc</code>というソフトウェアの命令で発生させることのできるもので、アプリケーションからOSの機能を呼び出すシステムコールを実装する際に使うものです。
+この例外ハンドラの処理として、OSから発生した場合はプロセスに、プロセスから発生した場合はOSに戻る、という処理を実装しましょう。
+SVCall例外が発生したとき、<code>SVCall</code>という関数を呼び出すように４章ですでにベクターテーブルを設定していたので、この関数を実装しましょう。
+<code>SysTick</code>のときと同じように<code>extern &quot;C&quot;</code>で宣言しているところから<code>SVCall</code>を消す必要もあります。</p>
+<pre><code>#[no_mangle]
+pub unsafe extern &quot;C&quot; fn SVCall() {
+    asm!(
+        &quot;
+        cmp lr, #0xfffffff9
+        bne to_kernel
+
+        mov r0, #1
+        msr CONTROL, r0
+        movw lr, #0xfffd
+        movt lr, #0xffff
+        bx lr
+    
+        to_kernel:
+        mov r0, #0
+        msr CONTROL, r0
+
+        movw lr, #0xfff9
+        movt lr, #0xffff
+        bx lr
+        &quot;
+    ::::&quot;volatile&quot;);
+}
+</code></pre>
+<p>さて、いきなり<code>asm!</code>というものが現れました。これはインラインアセンブラと呼ばれるもので、アセンブラ命令を直接埋め込むための記法です。
+ただし、この記法はstableのコンパイラではサポートされておらず、このままコンパイルするとエラーが出てしまいます。
+このようにstableでサポートされていない機能を用いるには、以下のような宣言を追加する必要があります。</p>
+<pre><code>#![feature(asm)]
+</code></pre>
+<p>これをmain.rsの冒頭に置いておきましょう。これでとりあえずコンパイルは通るようになるはずです。
+なぜ今回アセンブラ命令を直接使ったかというと、LRやシステムレジスタに直接アクセスする必要があったからです。
+本来、直接アセンブラ命令を書くことはあまり褒められた行為ではないです。
+まず、Rustならではの型のチェックやライフタイムの判定などができなくなりミスをしやすくなり、また、アーキテクチャ間での移植性も低くなってしまいます。
+ですが、今回のようなケースだとなんかしらの形でアセンブラを直接書かざるを得ないので、今回はインラインアセンブラを使っています。</p>
+<p>アセンブラの中身ですが、<code>cmp</code>というのが比較命令で、リンクレジスタの中身を見てあげることでカーネルから来たのかアプリケーションから来たのかを判定しています。
+<code>bne</code>は直前の比較命令で等しくない場合にラベルまでジャンプするという命令です。
+<code>msr</code>というのがシステムレジスタに値を書き込む命令です。<code>CONTROL</code>レジスタに1を書き込むことで非特権状態にすることができます。
+<code>movw</code>と<code>movt</code>命令でリンクレジスタの値を書き換えることで、使うスタックを切り替え、<code>bx</code>命令で例外復帰している、というような流れです。
+アセンブラの詳細についてはリファレンスマニュアルのA4章を参照するか、ネットで検索してもわかりやすい資料が結構あると思います。</p>
+<p>さて、<code>svc</code>命令でアプリケーション用の状態にしていきたいところですが、その前に、アプリケーション用のスタックポインタの初期値を決める必要があります。
+さらに、<code>SVCall</code>関数で例外復帰する際にスタックポインタに保存されたレジスタの値を実際のレジスタに書き戻すという処理がなされます。
+そのためアプリケーション用のスタックにアプリケーションの初期状態の値を格納しないといけません。
+では、まずスタック上にどのようにレジスタの値が保存されるかをちゃんと見てみましょう。
+前回の章でも紹介したリファレンスマニュアルのB1.5.7章に書かれています。
+スタックポインタにコンテキストステートフレームという形で8ワード（レジスタ8つ分）のデータが割り込みが発生すると保存されることが説明されています。
+これを予め設定してあげます。一つ注意点ですが、このスタックは通常は8バイトにアラインされていないといけない、つまりアドレスが8の倍数になっていなければならない点です。
+ここに気をつけてまずはスタック用のメモリ領域を確保するところからはじめましょう。
+通常のプログラムであれば、mallocなどでの動的メモリ確保の命令でメモリ領域を確保するのですが、mallocはOSのないベアメタルプログラムでは使えないです。
+そこでメモリ領域の一部を割り当てるように新しいセクションをリンカスクリプトで定義して、それをスタックとして使いましょう。</p>
+<p>まず、リンカスクリプトに以下のように新しいブロックを足します。</p>
+<pre><code>...
+  _sidata = LOADADDR(.data);
+
+  .app_stack ALIGN(0x08):
+  {
+    *(.app_stack .app_stack.*);
+  } &gt; RAM
+
+
+  /DISCARD/ :
+...
+</code></pre>
+<p>このセクションに新しいstatic変数を配置してあげましょう。static変数というのはプログラム実行中ずっと生き残り続ける変数です。</p>
+<pre><code>    #[link_section = &quot;.app_stack&quot;]
+    static mut APP_STACK: [u8; 1024] = [0; 1024];
+</code></pre>
+<p>0で初期化しているように見えますが、実際はbssセクションのように0初期化するプログラムを書いていないので、この配列の初期値は不定です。しかし、スタック領域は0初期化する必要がないので問題がありません。
+このメモリ領域の末尾8ワードに初期状態を格納するのですが、その前にわかりやすいように、コンテキストフレーム用の構造体を定義してあげましょう。
+そうすれば、後々の作業が楽になります。
+まず、これを新しいモジュール上に実装するため、<code>process.rs</code>という新しいファイルをつくり、その中に、以下のような構造体を宣言します。</p>
+<pre><code>#[repr(C)]
+pub struct ContextFrame {
+    pub r0: u32,
+    pub r1: u32,
+    pub r2: u32,
+    pub r3: u32,
+    pub r12: u32,
+    pub lr: u32,
+    pub return_addr: u32,
+    pub xpsr: u32,
+}
+</code></pre>
+<p><code>repr(C)</code>というアトリビュートがついています。これは通常のRustの構造体だと実際にどのように各メンバーがメモリ上に配置されるかという保証がないためつける必要があります。
+詳しくは<a href="https://doc.rust-lang.org/nomicon/data.html">Rustonomiconの2章のデータレイアウトに関する章</a>を参考にしてください。</p>
+<p>では、先程確保したスタック領域の末尾8ワードを<code>ContextFame</code>型として取り出すコードを書いてみましょう。</p>
+<pre><code>mod process;
+use process::ContextFrame;
+
+...
+    let ptr = (&amp;APP_STACK[0] as *const u8 as usize) + 1024 - 0x20;
+    let context_freame: &amp;mut ContextFrame = &amp;mut *(ptr as *mut ContextFrame);
+...
+</code></pre>
+<p>ポインタを参照に変換する処理はunsafeです。Reset関数内に書いているのであれば、Reset関数そのものがunsafeなのでunsafeブロックで囲う必要はないですが、それ以外の普通の関数としてくくりだしているときはunsafeブロックで囲ってあげましょう。</p>
+<p>初期値ですが、汎用レジスタは0で初期化すればよさそうです。LRの値も使われないので特に指定する必要はありません。
+<code>return_addr</code>はプログラムカウンタに書き戻される値になります。よってこの値はアプリケーションとして実行したいプログラムのアドレスにすればいいです。
+<code>xPSR</code>の値ですが、各ビットの詳細の説明はリファレンスマニュアルのB1.4.2に各ビットが何を示しているかが書いてあります。
+結論から言うと、EPSRに含まれる24ビットのTフィールドのみを1にすればいいです。このTというのはプログラムの命令フォーマットを示しています。
+このArmというアーキテクチャには実は2つの命令フォーマットが存在していて、プログラムのアドレスの下位1ビットを使ってそれを切り替える、という仕様がじつはあります。
+リファレンスマニュアルのA4.1章に詳細が書かれています。ArmにはARM命令セットとThumb命令セットという2つの命令セットがあり、これらを混在させることができます。
+しかし、ARMv7-MではThumb命令しかサポートしていません。<code>BX</code>などの命令でプログラムカウンタに値を書き込む際、最下位ビットの値が1ならばThumb命令として解釈されます。
+しかし、この例外復帰時のスタックからプログラムカウンタに書き戻される処理はこの命令セット切り替え処理はされず、最下位ビットは無視されます。
+なので、<code>return_addr</code>に対して何かをする必要はないです。</p>
+<p>とりあえず、プロセスから呼び出す関数を定義しておきましょう。適当な文字列を出力して、svc命令によってカーネル側に復帰するコードにしましょう。</p>
+<pre><code>extern &quot;C&quot; fn app_main() -&gt; ! {
+    hprintln!(&quot;App&quot;).unwrap();
+    unsafe { asm!(&quot;svc 0&quot;::::&quot;volatile&quot;); }
+    loop {}
+}
+</code></pre>
+<p>この関数を使い以下のようようなコードを書けば、初期領域ができます。</p>
+<pre><code>    context_freame.r0 = 0;
+    context_freame.r1 = 0;
+    context_freame.r2 = 0;
+    context_freame.r3 = 0;
+    context_freame.r12 = 0;
+    context_freame.lr = 0;
+    context_freame.return_addr = app_main as u32;
+    context_freame.xpsr = 0x0100_0000;
+</code></pre>
+<p>あとは、<code>svc</code>命令を呼び出して上げましょう。プロセススタックポインタの値を初期化するのもあわせて行う必要があります。</p>
+<pre><code>    asm!(
+        &quot;
+        msr psp, r0
+        svc 0
+        &quot;
+        ::&quot;{r0}&quot;(ptr):&quot;r4&quot;, &quot;r5&quot;, &quot;r6&quot;, &quot;r7&quot;, &quot;r8&quot;, &quot;r9&quot;, &quot;r10&quot;, &quot;r11&quot;:&quot;volatile&quot;);
+</code></pre>
+<p>3つ目のコロンに続くところにr4などのレジスタが列挙されていますが、これはこのアセンブラ命令中に変更される可能性があるレジスタです。
+このように書いておけば、コンパイルするときにこれらのレジスタが変更されることを考慮したコードが出力されます。
+4章でも触れましたが、例外が発生したときにこれらのレジスタはスタックに保存されないため、これらはきちんと保存しなければなりません。</p>
+<p>さて、ここまでできればあとはビルドして実行するだけです。
+以下のような出力がOpenOCDから出てくるはずです。</p>
+<pre><code>Hello World
+Systick init
+App
+Kernel
+Systick
+Systick
+...
+</code></pre>
+<h1><a class="header" href="#スケジューラを実装する" id="スケジューラを実装する">スケジューラを実装する</a></h1>
+<p>前回の章でアプリケーションプロセスへの切り替えを実装しました。
+しかし、現状だと再びアプリケーションに突入したり、複数のアプリケーションを動かしたり、といったことができていません。
+この章では、簡単なラウンドロビン型のスケジューラを実装して複数のアプリケーションを動かすことを目標としましょう。</p>
 <p>TBD</p>
 
                     </main>
