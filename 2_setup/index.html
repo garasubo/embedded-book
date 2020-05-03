@@ -157,7 +157,10 @@
 <p>rustupはRustコンパイラのインストール・アップデートやバージョン管理をしてくれるツールです。
 今回は特に<code>nightly</code>と呼ばれる、いわゆるベータ版のようなRustコンパイラを使うことになるのですが、nightlyと安定版である<code>stable</code>の切り替えもコマンド一つで行えて大変便利です。</p>
 <p>今回はnightlyの2019-09-19のバージョンを使います。以下のようにして<code>nightly-2019-09-18</code>をインストールしましょう。</p>
-<pre><code>rustup install nightly-2019-09-18
+<pre><code>$ rustup install nightly-2019-09-18
+</code></pre>
+<p>さらにArmのクロスコンパイル用の環境を入れるために以下のコマンドを実行します</p>
+<pre><code>$ rustup target add thumbv7em-none-eabihf
 </code></pre>
 <h2><a class="header" href="#使用ボード" id="使用ボード">使用ボード</a></h2>
 <p>STマイクロエレクトロニクス社の<a href="https://www.st.com/ja/evaluation-tools/nucleo-f429zi.html">NUCLEO-F429ZIボード</a>を使用します。

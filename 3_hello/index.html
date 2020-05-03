@@ -319,6 +319,7 @@ PC側はこのインターフェースを利用するために<a href="http://op
 <code>cargo build</code>で生成されたバイナリは<code>target/&lt;アーキテクチャ名&gt;/debug/&lt;アプリケーション名&gt;</code>にあります。
 しかし、もとのプログラムが無限ループするだけで何もしていないプログラムのため、これでは動いているかどうかすらよくわかりません。
 そこで、デバッガを利用することでどのようにプログラムが動いているか覗いてみましょう。デバッガは<code>GDB</code>を利用します。
+Ubuntu 18.04以降では<code>apt</code>より<code>gdb-multiarch</code>を、それ以前の場合は<code>gdb-arm-none-eabi</code>をインストールしましょう。
 GDBには別の環境で動いているプログラムと通信してデバッグする機能があります。Open OCDはGDBと通信するためのサーバーとしての機能もあります。
 ターミナルを2つ開いて、片方のターミナルでは</p>
 <pre><code>openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x.cfg
