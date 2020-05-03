@@ -13,9 +13,13 @@ rustupはRustコンパイラのインストール・アップデートやバー�
 
 今回はnightlyの2019-09-19のバージョンを使います。以下のようにして`nightly-2019-09-18`をインストールしましょう。
 ```
-rustup install nightly-2019-09-18
+$ rustup install nightly-2019-09-18
 ```
 
+さらにArmのクロスコンパイル用の環境を入れるために以下のコマンドを実行します
+```
+$ rustup target add thumbv7em-none-eabihf
+```
 
 ## 使用ボード
 STマイクロエレクトロニクス社の[NUCLEO-F429ZIボード](https://www.st.com/ja/evaluation-tools/nucleo-f429zi.html)を使用します。
