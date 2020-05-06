@@ -151,6 +151,201 @@
 <p>前回の章でアプリケーションプロセスへの切り替えを実装しました。
 しかし、現状だと再びアプリケーションに突入したり、複数のアプリケーションを動かしたり、といったことができていません。
 この章では、簡単なラウンドロビン型のスケジューラを実装して複数のアプリケーションを動かすことを目標としましょう。</p>
+<p>スケジューラを実装するには前章まででやってきたアプリケーションプロセスへの切り替えに加えて以下のことが必要です。</p>
+<ul>
+<li>次に実行可能なプロセスを指すための構造体を実装する</li>
+<li>プロセスの状態をメモリ上に保管する構造体とその保存ロジックの実装</li>
+</ul>
+<p>順番にやっていきましょう</p>
+<h2><a class="header" href="#連結リストを実装する" id="連結リストを実装する">連結リストを実装する</a></h2>
+<p>スケジューラを実装するに当たって、実行中のプロセスの情報を連結リストの形式で持っておきたいです。
+今回実装するスケジューラでは、実行が終わったプロセスを末尾に追加して、先頭から次に実行するプロセスを取ってくるため連結リストを利用したいです。
+しかしながら、<code>no_std</code>のプログラミングではお馴染みの動的配列である<code>Vec</code>や<code>LinkedList</code>は使えないので似たような構造体がほしいです。</p>
+<p>では、連結リストを<code>linked_list.rs</code>内に実装してみましょう。
+C言語などで実装したことがある人がいるとは思いますが、普通はおおよそこんな感じになるでしょう。</p>
+<ul>
+<li>リスト内に入る各アイテムは、そのアイテムの実際の値と次のアイテムへのポインタを持つ</li>
+<li>リスト構造体そのものは先頭要素へのポインタと末尾要素へのポインタを持つ</li>
+<li>新しいアイテムを追加するときは現在の末尾要素の次に追加して、リストの持つ末尾要素ポインタを更新</li>
+<li>先頭から要素を取り出すには先頭要素ポインタから取り出して、次の要素をリストの持つ先頭要素ポインタに更新</li>
+</ul>
+<p>Rustでは生ポインタもありますが、通常であればポインタよりも参照を用いた実装が好まれます。
+しかし、先程あげたような機能を持つ連結リストは参照では実装は困難です。実際に見てみましょう。</p>
+<p>まず、リストそのものと、リストに格納される各要素の定義は以下のような感じになるでしょう。</p>
+<pre><code>pub struct ListItem&lt;'a, T&gt; {
+    value: T,
+    next: Option&lt;&amp;'a mut ListItem&lt;'a, T&gt;&gt;,
+}
+
+pub struct LinkedList&lt;'a, T&gt; {
+    head: Option&lt;&amp;'a mut ListItem&lt;'a, T&gt;&gt;,
+    last: Option&lt;&amp;'a mut ListItem&lt;'a, T&gt;&gt;,
+}
+</code></pre>
+<p>試しに末尾に新しい要素を追加するというメソッドを実装してみましょう。素直に実装するとこんな感じでしょうか。</p>
+<pre><code>impl&lt;'a, T&gt; LinkedList&lt;'a, T&gt; {
+    pub fn push(&amp;mut self, item: &amp;'a mut ListItem&lt;'a, T&gt;) {
+        if self.last.is_none() {
+            self.last = Some(item);
+            self.head = Some(item);
+        } else {
+            let prev_last = self.last.replace(item);
+            prev_last.map(|i| i.next = Some(item));
+        }
+    }
+}
+</code></pre>
+<p>しかし、これはコンパイルエラーになります。なぜなら、<code>item</code>はミュータブルな参照なのにもかかわらず、
+<code>self.last</code>と<code>self.head</code>ないし1つ手前の<code>ListItem</code>の<code>next</code>の2つのメンバーに保持される必要があります。
+ミュータブルな参照は複数存在できないので、このような形では素直には実装できないです。</p>
+<p>では、標準ライブラリではどのように実装されているかというと、生ポインタを使うことで解決しています。
+確かに生ポインタを使うことは安全ではないのですが、標準ライブラリ内部ではしばしば<code>unsafe</code>な部分が存在しています。
+その代わり提供するインターフェスは生ポインタを使うことがないようにして安全でない部分を限定している、というわけです。
+そういうことで、ここでは生ポインタを使うことにしましょう。その代わり、このモジュールにはテストを書いておき、きちんとバグがないよう確認しておきましょう。</p>
+<p>まず、テストとしては以下のようなものを書いておきましょう。</p>
+<pre><code>#[cfg(test)]
+mod test {
+    use ListItem;
+    use LinkedList;
+
+    #[test]
+    fn test_list() {
+        let mut item1 = ListItem::new(1);
+        let mut item2 = ListItem::new(2);
+        let mut item3 = ListItem::new(3);
+        let mut list = LinkedList::new();
+
+        list.push(&amp;mut item1);
+        list.push(&amp;mut item2);
+        list.push(&amp;mut item3);
+
+        let result1: &amp;u32 = list.pop().unwrap();
+        let result2: &amp;u32 = list.pop().unwrap();
+        let result3: &amp;u32 = list.pop().unwrap();
+        assert_eq!(1, *result1);
+        assert_eq!(2, *result2);
+        assert_eq!(3, *result3);
+
+        assert!(list.is_empty());
+
+        let mut item4 = ListItem::new(4);
+        let mut item5 = ListItem::new(5);
+        list.push(&amp;mut item4);
+        list.push(&amp;mut item5);
+
+        let result4: &amp;u32 = list.pop().unwrap();
+        let result5: &amp;u32 = list.pop().unwrap();
+        assert_eq!(4, *result4);
+        assert_eq!(5, *result5);
+
+        assert!(list.is_empty());
+    }
+}
+
+</code></pre>
+<p>最低限のテストではありますが、とりあえず必要なものは見えてきたと思います。
+<code>list.pop().unwrap()</code>の結果を<code>&amp;u32</code>として変数に束縛していますが、これは<code>ListItem&lt;'a, T&gt;</code>に対して<a href="https://doc.rust-lang.org/std/ops/trait.Deref.html"><code>Deref</code></a>を実装していることを想定しています。
+以降、生ポインタを使っての実際の実装を見せていきますが、ある程度すでにRustに習熟しているのであれば、この仕様を満たすように自力で実装するのもいいでしょう。
+以下に示すのはあくまで一例です。また、実装の踏み込んだ解説はあまりしないでおきます。</p>
+<p>まずは構造体そのもの定義を変えましょう。参照はすべてポインタに置き換えてしまうのが一番愚直なやりかただと思うので、そうします（もちろん一部を参照を残すこともできます）。</p>
+<pre><code>use core::ptr::NonNull;
+use core::marker::PhantomData;
+
+pub struct ListItem&lt;'a, T&gt; {
+    value: T,
+    next: Option&lt;NonNull&lt;ListItem&lt;'a, T&gt;&gt;&gt;,
+    marker: PhantomData&lt;&amp;'a ListItem&lt;'a, T&gt;&gt;,
+}
+
+pub struct LinkedList&lt;'a, T&gt; {
+    head: Option&lt;NonNull&lt;ListItem&lt;'a, T&gt;&gt;&gt;,
+    last: Option&lt;NonNull&lt;ListItem&lt;'a, T&gt;&gt;&gt;,
+    marker: PhantomData&lt;&amp;'a ListItem&lt;'a, T&gt;&gt;,
+}
+</code></pre>
+<p><a href="https://doc.rust-lang.org/core/ptr/struct.NonNull.html"><code>NonNull</code></a>と<a href="https://doc.rust-lang.org/core/marker/struct.PhantomData.html"><code>PhantomData</code></a>という構造体を使っています。
+<code>NonNull</code>はnon-nullでないポインタを意味します。普通の<code>*mut T</code>に対して0ではないという制約がついているわけですが、これにより<code>Option</code>でくくったときに0という値を<code>None</code>として使うようにコンパイルされるため、<code>Option&lt;NonNull&lt;T&gt;&gt;</code>と<code>*mut T</code>のコンパイル後のサイズが同じという利点が生まれます。
+すべてをポインタに置き換えてしまうとライフタイムの情報がなくなってしまいます。コンパイル時にこれらの情報を失わないように<code>PhantomData</code>を使ってます。
+これはコンパイルされるとサイズが全くないものになるのですが、実際のメンバーのように振る舞うことで型引数をさも要求しているようにコンパイラに見せかけるための構造体です。
+詳しくは公式ドキュメントを参照してください。</p>
+<p>関数の実装は以下のようにしてみました。</p>
+<pre><code>impl&lt;'a, T&gt; ListItem&lt;'a, T&gt; {
+    pub fn new(value: T) -&gt; Self {
+        ListItem {
+            value,
+            next: None,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl&lt;'a, T&gt; LinkedList&lt;'a, T&gt; {
+    pub fn new() -&gt; Self {
+        LinkedList {
+            head: None,
+            last: None,
+            marker: PhantomData,
+        }
+    }
+
+    pub fn push(&amp;mut self, item: &amp;'a mut ListItem&lt;'a, T&gt;) {
+        let ptr = unsafe { NonNull::new_unchecked(item as *mut ListItem&lt;T&gt;) };
+        let prev_last = self.last.replace(ptr);
+
+        if prev_last.is_none() {
+            self.head = Some(ptr);
+        } else {
+            prev_last.map(|mut i| unsafe {
+                i.as_mut().next = Some(ptr);
+            });
+        }
+    }
+
+    pub fn is_empty(&amp;self) -&gt; bool {
+        self.head.is_none()
+    }
+
+    pub fn pop(&amp;mut self) -&gt; Option&lt;&amp;'a mut ListItem&lt;'a, T&gt;&gt; {
+        let result = self.head.take();
+        let next = result.and_then(|mut ptr| unsafe {
+            ptr.as_mut().next
+        });
+
+        if next.is_none() {
+            self.last = None;
+        }
+
+        self.head = next;
+
+        result.map(|ptr| unsafe { &amp;mut *ptr.as_ptr() })
+    }
+}
+</code></pre>
+<p>構造体のメンバーをすべてプライベートにしてしまっているので、<code>ListItem</code>からvalueの値を取り出すことがこのままではできません。
+新たなメソッドを追加するのもいいですが、<code>Deref</code>を実装するという方法で実現してみましょう。</p>
+<pre><code>use core::ops::{Deref, DerefMut};
+
+impl&lt;'a, T&gt; Deref for ListItem&lt;'a, T&gt; {
+    type Target = T;
+
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.value
+    }
+}
+
+impl&lt;'a, T&gt; DerefMut for ListItem&lt;'a, T&gt; {
+    fn deref_mut(&amp;mut self) -&gt; &amp;mut Self::Target {
+        &amp;mut self.value
+    }
+}
+</code></pre>
+<p>ここまで書いたところでテストを走らせたいのですが、このプロジェクト全体が標準ライブラリなしでArmへのクロスコンパイルを前提として書かれていることもあり、このまま<code>cargo test</code>を実行しても正常に動きません。
+しかし、このモジュール単体はアーキテクチャへの依存がないため、このプロジェクトは切り離してのテストが可能です。
+手軽な方法としては<code>rustc --test</code>でこのファイルのみをテストしてしまうことでしょうか。その際、このファイルの冒頭に<code>#![no_std]</code>をつける必要があります。
+ただし、モジュールに本来クレートレベルのアトリビュートである<code>no_std</code>をつけてしまうと、プロジェクト全体をコンパイルしたときに警告が出てしまいます。
+他の方法としては、これを別クレートとして新しいプロジェクトに切り出してしまうことです。これならば、その新しくつくったプロジェクト上で<code>cargo test</code>を実行すればいいです。
+この方法ならば、コンパイル時の警告もないので、よりまっとうな方法になるでしょう。</p>
+<h2><a class="header" href="#プロセスの状態を保存する" id="プロセスの状態を保存する">プロセスの状態を保存する</a></h2>
 <p>TBD</p>
 
                     </main>
