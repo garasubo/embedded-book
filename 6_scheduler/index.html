@@ -219,8 +219,11 @@ mod test {
         list.push(&amp;mut item2);
         list.push(&amp;mut item3);
 
+        assert_eq!(Some(&amp;mut 1), list.head_mut());
         let result1: &amp;u32 = list.pop().unwrap();
+        assert_eq!(Some(&amp;mut 2), list.head_mut());
         let result2: &amp;u32 = list.pop().unwrap();
+        assert_eq!(Some(&amp;mut 3), list.head_mut());
         let result3: &amp;u32 = list.pop().unwrap();
         assert_eq!(1, *result1);
         assert_eq!(2, *result2);
@@ -243,8 +246,14 @@ mod test {
 }
 
 </code></pre>
-<p>最低限のテストではありますが、とりあえず必要なものは見えてきたと思います。
-<code>list.pop().unwrap()</code>の結果を<code>&amp;u32</code>として変数に束縛していますが、これは<code>ListItem&lt;'a, T&gt;</code>に対して<a href="https://doc.rust-lang.org/std/ops/trait.Deref.html"><code>Deref</code></a>を実装していることを想定しています。
+<p>最低限のテストではありますが、とりあえず必要なものは見えてきたと思います。</p>
+<ul>
+<li><code>push</code>：リストの末尾に要素を追加する</li>
+<li><code>pop</code>：先頭要素を取り出す。返り値は<code>Option</code>でラップしてリストが空なら<code>None</code>が返る</li>
+<li><code>head_mut</code>： 先頭要素のミュータブルな参照を<code>Option</code>でラップして返す。リストそのものは変更しない。</li>
+<li><code>is_empty</code>：リストの中に要素が存在するかどうか</li>
+</ul>
+<p><code>list.pop().unwrap()</code>の結果を<code>&amp;u32</code>として変数に束縛していますが、これは<code>ListItem&lt;'a, T&gt;</code>に対して<a href="https://doc.rust-lang.org/std/ops/trait.Deref.html"><code>Deref</code></a>を実装していることを想定しています。
 以降、生ポインタを使っての実際の実装を見せていきますが、ある程度すでにRustに習熟しているのであれば、この仕様を満たすように自力で実装するのもいいでしょう。
 以下に示すのはあくまで一例です。また、実装の踏み込んだ解説はあまりしないでおきます。</p>
 <p>まずは構造体そのもの定義を変えましょう。参照はすべてポインタに置き換えてしまうのが一番愚直なやりかただと思うので、そうします（もちろん一部を参照を残すこともできます）。</p>
@@ -305,6 +314,10 @@ impl&lt;'a, T&gt; LinkedList&lt;'a, T&gt; {
         self.head.is_none()
     }
 
+    pub fn head_mut(&amp;mut self)-&gt; Option&lt;&amp;mut T&gt; {
+        self.head.map(|ptr| unsafe { &amp;mut *ptr.as_ptr() }.deref_mut())
+    }
+
     pub fn pop(&amp;mut self) -&gt; Option&lt;&amp;'a mut ListItem&lt;'a, T&gt;&gt; {
         let result = self.head.take();
         let next = result.and_then(|mut ptr| unsafe {
@@ -321,6 +334,9 @@ impl&lt;'a, T&gt; LinkedList&lt;'a, T&gt; {
     }
 }
 </code></pre>
+<p><code>pop</code>の返り値が<code>T</code>の参照でなく<code>ListItem</code>の参照なのは<code>pop</code>で返ってきた構造体を再度リストに追加する、ということができるようにするためです。
+<code>push</code>が<code>T</code>でなく<code>ListItem</code>の参照を引数に取っているのは少々美しくないようにも思えます。しかし、現状動的なメモリ確保の方法を実装していません。
+そのため、<code>ListItem</code>のためのメモリ領域を確保することができないのでほかから渡してもらう必要があるというわけです。</p>
 <p>構造体のメンバーをすべてプライベートにしてしまっているので、<code>ListItem</code>からvalueの値を取り出すことがこのままではできません。
 新たなメソッドを追加するのもいいですが、<code>Deref</code>を実装するという方法で実現してみましょう。</p>
 <pre><code>use core::ops::{Deref, DerefMut};
@@ -346,7 +362,202 @@ impl&lt;'a, T&gt; DerefMut for ListItem&lt;'a, T&gt; {
 他の方法としては、これを別クレートとして新しいプロジェクトに切り出してしまうことです。これならば、その新しくつくったプロジェクト上で<code>cargo test</code>を実行すればいいです。
 この方法ならば、コンパイル時の警告もないので、よりまっとうな方法になるでしょう。</p>
 <h2><a class="header" href="#プロセスの状態を保存する" id="プロセスの状態を保存する">プロセスの状態を保存する</a></h2>
-<p>TBD</p>
+<p>次にプロセス状態を保存する構造体を定義しましょう。
+プロセスの状態としてまず、そのプロセスで使うスタックポインタは保存しなければなりません。
+さらに保存しなければならないのは、スタックに退避されないレジスタたちです。</p>
+<p>スタックポインタの値はusizeとして、退避されていないレジスタはまとめて<code>u32</code>型の配列として持っておきましょう。</p>
+<pre><code>pub struct Process&lt;'a&gt; {
+    sp: usize,
+    regs: [u32; 8],
+    marker: PhantomData&lt;&amp;'a u8&gt;,
+}
+</code></pre>
+<p>プロセスをつくる関数もつくりましょう。スタック用の領域とプロセスの中で実行したい関数を渡したらプロセス構造体が返ってくるとよさそうですね。
+その際、スタック領域の初期化処理もしてしまいましょう。</p>
+<pre><code>impl&lt;'a&gt; Process&lt;'a&gt; {
+    pub fn new(stack: &amp;'a mut [u8], app_main: extern &quot;C&quot; fn() -&gt; !) -&gt; Self {
+        let sp = (&amp;stack[0] as *const u8 as usize) + stack.len() - 0x20;
+        let context_freame: &amp;mut ContextFrame = unsafe { &amp;mut *(sp as *mut ContextFrame) };
+        context_freame.r0 = 0;
+        context_freame.r1 = 0;
+        context_freame.r2 = 0;
+        context_freame.r3 = 0;
+        context_freame.r12 = 0;
+        context_freame.lr = 0;
+        context_freame.return_addr = app_main as u32;
+        context_freame.xpsr = 0x0100_0000;
+
+        Process {
+            sp: sp as *mut u8,
+            regs: [0; 8],
+            marker: PhantomData,
+        }
+    }
+}
+</code></pre>
+<p>このプロセスを実行させるコードも実装しましょう。
+プロセスは割り込みが発生すると中断する可能性があります。それを考慮して実装する必要があります。
+前章で実装したプロセススタックポインタの書き込みの他に、<code>ContextFrame</code>の中に保存されていないレジスタの書き戻しをする必要があります。
+これは中断されたプロセスを再開するためのものです。
+また、カーネルに復帰した際、その時点でのプロセススタックポインタと<code>ContextFrame</code>の中に保存されていないレジスタを保存する処理も必要です。</p>
+<pre><code>    pub fn exec(&amp;mut self) {
+        unsafe {
+            asm!(
+                &quot;
+                msr psp, r0
+                ldmia r1, {r4-r11}
+                svc 0
+                stmia r1, {r4-r11}
+                mrs r0, psp
+                &quot;
+                :&quot;={r0}&quot;(self.sp)
+                :&quot;{r0}&quot;(self.sp), &quot;{r1}&quot;(&amp;self.regs)
+                :&quot;r4&quot;, &quot;r5&quot;, &quot;r6&quot;, &quot;r7&quot;, &quot;r8&quot;, &quot;r9&quot;, &quot;r10&quot;, &quot;r11&quot;
+                :&quot;volatile&quot;
+            );
+        }
+    }
+</code></pre>
+<p><code>ldmaia</code>と<code>stmia</code>は複数のレジスタの値をまとめてメモリからロード・ストアするための命令です。
+スタックポインタ上にレジスタを退避させたりするのに使われます。<code>r1</code>がメモリアドレスになり、この命令後に本来は書き換えられるのですが、
+<code>ldmai</code>後に<code>stmia</code>を実行しているので変化した分がすぐに戻されているため、変化が打ち消されているため値の変化はトータルではありません。
+<code>mrs</code>が<code>msr</code>の逆でシステムレジスタを読み出すための命令です。</p>
+<p>ここまでできたら、前回実装したプロセス切り替え部分のコードをこれらのコードで置き換えてみましょう。
+<code>APP_STACK</code>を定義したあとのコードを以下のように書き換えてみましょう。</p>
+<pre><code>    #[link_section = &quot;.app_stack&quot;]
+    static mut APP_STACK: [u8; 2048] = [0; 2048];
+
+    let mut process = Process::new(&amp;mut APP_STACK, app_main);
+    process.exec();
+
+    hprintln!(&quot;Kernel&quot;).unwrap();
+</code></pre>
+<p>ここまでできたら一度コンパイルしてみて動作確認してみましょう。</p>
+<h2><a class="header" href="#スケジューラ本体の実装" id="スケジューラ本体の実装">スケジューラ本体の実装</a></h2>
+<p>必要なパーツは全て揃ったところで、これらを組み合わせてスケジューラを実装しましょう。
+今回実装するのは登録されたプロセスを順番に実行していくだけのラウンドロビン型のスケジューラです。
+なお、プロセスが終了してメモリが開放されることは今回は考えないことにします。
+<code>scheduler.rs</code>の中に実装していきましょう。</p>
+<p>まず、スケジューラの構造体のメンバーとして保持しておきたいのは実行したいプロセスの連結リストです。</p>
+<pre><code>use crate::linked_list::{LinkedList, ListItem};
+use crate::process::Process;
+
+pub struct Scheduler&lt;'a&gt; {
+    list: LinkedList&lt;'a, Process&lt;'a&gt;&gt;,
+}
+</code></pre>
+<p>実装する関数としては、コンストラクタの他にプロセスの追加関数と、スケジューラ内の関数を実行し続ける関数を実装しましょう。</p>
+<pre><code>impl&lt;'a&gt; Scheduler&lt;'a&gt; {
+    pub fn new() -&gt; Self {
+        Scheduler {
+            list: LinkedList::new(),
+        }
+    }
+
+    pub fn push(&amp;mut self, item: &amp;'a mut ListItem&lt;'a, Process&lt;'a&gt;&gt;) {
+        self.list.push(item);
+    }
+
+    fn schedule_next(&amp;mut self) {
+        let current = self.list.pop().unwrap();
+        self.list.push(current);
+    }
+
+    pub fn exec(&amp;mut self) -&gt; ! {
+        loop {
+            let current = self.list.head_mut();
+            if current.is_none() {
+                unimplemented!();
+            }
+            current.map(|p| {
+                p.exec();
+            });
+            self.schedule_next();
+        }
+
+    }
+}
+</code></pre>
+<p><code>exec</code>が実行用の関数です。リストの先頭要素を実行して、実行が中断されるとリストから一度取り出され、末尾に再度追加されます。
+各プロセスが実行を中断するには現状はプロセスが自発的に<code>svc</code>命令を発行するしかありません。
+本来であれば、OSが何らかの例外が発生したら切り替えるなどの処理を実装することが多いです（例えばタイマー割り込みで一定時間以上実行していたら切り替える）。が、今回は何もしないことにしましょう。</p>
+<p>では、このスケジューラの動作確認のために、簡単なプロセスを３つ用意して、それらをスケジューリングしてみましょう。
+まず、各プロセス用の関数ですが、<code>app_main</code>と同じように適当な文字を出力させる関数を追加で２つ用意しましょう。
+ただし、プロセスが再開したあとなにもしない無限ループを実行されるとなにもわからなくなるので、文字出力と<code>svc</code>をひたすら繰り返す、というものにしましょう。</p>
+<pre><code>extern &quot;C&quot; fn app_main2() -&gt; ! {
+    loop {
+        hprintln!(&quot;App2&quot;).unwrap();
+        unsafe { asm!(&quot;svc 0&quot;::::&quot;volatile&quot;); }
+    }
+}
+
+extern &quot;C&quot; fn app_main3() -&gt; ! {
+    loop {
+        hprintln!(&quot;App3&quot;).unwrap();
+        unsafe { asm!(&quot;svc 0&quot;::::&quot;volatile&quot;); }
+    }
+}
+</code></pre>
+<p>また、<code>app_main</code>も以下のように書き換えましょう。</p>
+<pre><code>extern &quot;C&quot; fn app_main() -&gt; ! {
+    let mut i = 0;
+    loop {
+        hprintln!(&quot;App: {}&quot;, i).unwrap();
+        unsafe { asm!(&quot;svc 0&quot;::::&quot;volatile&quot;); }
+        i += 1;
+    }
+}
+</code></pre>
+<p>あとは、<code>Reset</code>関数の末尾を書き換えてスケジューラにプロセス３つを追加しましょう。
+まずは、モジュールから使うものを以下のように宣言しておきます。</p>
+<pre><code>mod linked_list;
+use linked_list::ListItem;
+use process::Process;
+mod scheduler;
+use scheduler::Scheduler;
+</code></pre>
+<p>あとは、<code>Process</code>を<code>ListItem</code>でラップしたものを3つつくり、これをスケジューラの中に入れて実行するだけです。
+なお、<code>Scheduler::exec</code>自身が発散する関数なので、最後の無限ループも取り除くことができます。</p>
+<pre><code>    #[link_section = &quot;.app_stack&quot;]
+    static mut APP_STACK: [u8; 2048] = [0; 2048];
+    #[link_section = &quot;.app_stack&quot;]
+    static mut APP_STACK2: [u8; 2048] = [0; 2048];
+    #[link_section = &quot;.app_stack&quot;]
+    static mut APP_STACK3: [u8; 2048] = [0; 2048];
+
+    let mut process1 = Process::new(&amp;mut APP_STACK, app_main);
+    let mut item1 = ListItem::new(process1);
+    let mut process2 = Process::new(&amp;mut APP_STACK2, app_main2);
+    let mut item2 = ListItem::new(process2);
+    let mut process3 = Process::new(&amp;mut APP_STACK3, app_main3);
+    let mut item3 = ListItem::new(process3);
+    let mut sched = Scheduler::new();
+    sched.push(&amp;mut item1);
+    sched.push(&amp;mut item2);
+    sched.push(&amp;mut item3);
+
+    sched.exec();
+}
+</code></pre>
+<p>こうしてビルドすれば以下のような実行結果が得られるはずです。</p>
+<pre><code>Hello World
+Systick init
+App: 0
+App2
+App3
+App: 1
+App2
+App3
+App: 2
+App2
+App3
+App: 3
+App2
+...
+</code></pre>
+<p>なお、Systick割り込みがなかなか表示されないことに気がつくと思いますが、これはSystickのタイマーがデバッグ状態では値が減らないためであり、
+デバッグ状態を利用するセミホスティングを利用した出力をたくさんしていると現実の時間が進んでいても、Systickのタイマーが減らないという事態が起きているからです。
+試しに<code>hprintln</code>命令を取り除いてあげるとちゃんとSystickが呼び出されるようになるはずです。</p>
 
                     </main>
 

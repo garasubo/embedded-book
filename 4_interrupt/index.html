@@ -263,7 +263,7 @@ pub extern &quot;C&quot; fn SysTick() {
 ところで、今まですべての関数をすべて<code>main.rs</code>に書いてきてしまいました。Embedonmiconではいくつかのサブプロジェクトにわけてクレートとして分離する、という方法をとってコードを整理しています。
 同じようにクレートとして分離するのも悪くないのですが、今回はお手軽にモジュールという形で分離しましょう。
 詳しくは<a href="https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html">TPRLの7章</a>が参考になると思います。
-このモジュールのシステムは2018 Editionで大きく変更がされているため、いくつかのブログは2015 Editionをベースにしてある場合があることに注意が必要です。
+このモジュールのシステムは2018 Editionで大きく変更がされているため、個人のブログなどで2015 Editionをベースに解説してる場合があることに注意が必要です。
 ただし、後方互換性はあるので、2015 Editionに沿った方法でモジュールを分割しても大きな問題にはなりません。</p>
 <p><code>src</code>ディレクトリ以下に<code>systick.rs</code>という以下のような関数を含んだファイルをつくりましょう。</p>
 <pre><code>use cortex_m_semihosting::hprintln;
