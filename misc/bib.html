@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>環境構築 - Rustで始める自作組込みOS入門</title>
+        <title>参考文献 - Rustで始める自作組込みOS入門</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html" class="active"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="../6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="../misc/bib.html">参考文献</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="../6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="../misc/bib.html" class="active">参考文献</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -147,66 +147,33 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#環境構築" id="環境構築">環境構築</a></h1>
-<p>筆者はUbuntu 18.04で動作確認をしていますが、基本的にはWindowsやMac環境でも構築可能です。</p>
-<h2><a class="header" href="#rust" id="rust">Rust</a></h2>
-<p><code>rustup</code>を使う方法が公式でも全プラットフォーム共通で推薦されているので、これに従います。
-[https://rustup.rs/]の方法に従って、rustupをインストールします。LinuxやMacのようなUnixライクなOSの場合、以下のようにインストールします。</p>
-<pre><code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-</code></pre>
-<p>rustupはRustコンパイラのインストール・アップデートやバージョン管理をしてくれるツールです。
-今回は特に<code>nightly</code>と呼ばれる、いわゆるベータ版のようなRustコンパイラを使うことになるのですが、nightlyと安定版である<code>stable</code>の切り替えもコマンド一つで行えて大変便利です。</p>
-<p>今回はnightlyの2019-09-19のバージョンを使います。以下のようにして<code>nightly-2019-09-18</code>をインストールしましょう。</p>
-<pre><code>$ rustup install nightly-2019-09-18
-</code></pre>
-<p>さらにArmのクロスコンパイル用の環境を入れるために以下のコマンドを実行します</p>
-<pre><code>$ rustup target add thumbv7em-none-eabihf
-</code></pre>
-<h2><a class="header" href="#使用ボード" id="使用ボード">使用ボード</a></h2>
-<p>STマイクロエレクトロニクス社の<a href="https://www.st.com/ja/evaluation-tools/nucleo-f429zi.html">NUCLEO-F429ZIボード</a>を使用します。
-ただし、この本では多くのペリフェラルは使わないので、ST社のCortex-Mの他のボードでも十分に再現可能かと思われます。</p>
-<h2><a class="header" href="#仕様書ドキュメント" id="仕様書ドキュメント">仕様書・ドキュメント</a></h2>
-<h3><a class="header" href="#ハードウェア関連" id="ハードウェア関連">ハードウェア関連</a></h3>
-<p>低レイヤーシステムは仕様書をちゃんと読み理解する、ということがとても重要になります。
-マイコンボードの種類によっては、仕様書を手に入れるためには面倒な契約を結ぶ必要があるケースもありますが、今回使うNucleoボード及びそのCPUの仕様書はすべてオンラインで入手可能です。
-この本では、実際に仕様書を参照しつつ、OSを書いていきますのでこれらもダウンロードしてください。
-なお、以下のリンクにある仕様書は基本的に英語版です。日本語版もある場合がありますが、最新版ではないため英語版を参照するほうが安全です。</p>
+                        <p>このドキュメントを執筆するにあたってハードウェアのマニュアル以外に参考にしたもの、
+参考にはしていないが、この先自作OSをつくりこむにあたって参考になるであろう書籍やドキュメントを紹介します。</p>
 <ul>
 <li>
-<p><a href="https://developer.arm.com/docs/ddi0403/ed/armv7-m-architecture-reference-manual">Arm®v7-M Architecture Reference Manual</a>
-ボードに乗っているCPUの基本的な仕様書です。アセンブラ命令の解説や、割り込みが発生したときの挙動、システムレジスタの仕様などが書かれています。</p>
+<p><a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a>
+Rust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントです。
+このドキュメントもこのドキュメントがベースになっています。より踏み込んだロギングやDMAのためのテクニックも解説しています。</p>
 </li>
 <li>
-<p><a href="https://developer.arm.com/docs/100166/0001">ARM Cortex-M4 Processor Technical Reference Manual Revision r0p1 Documentation</a>
-Arm v7-Mの仕様に基づいたアーキテクチャであるCortex-M4のマニュアルです。<a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439cj/index.html">日本語版</a>も多少古いバージョンですが存在します。
-割り込みコントローラやメモリ保護機構などの解説があります。また、Arm v7-Mについても簡単な説明があります。</p>
+<p><a href="https://docs.rust-embedded.org/book/index.html">The Embedded Rust Book</a>
+こちらもRust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントですが、Rust Embeddedワーキンググループが用意したクレートを活用してのプログラミングです。
+今回はあえてこれらのクレートは使わないような実装にしましたが、特にペリフェラルのドライバを書くのに参考になると思います。</p>
 </li>
 <li>
-<p><a href="https://www.stmcu.jp/design/document/reference_manual/51544/">STM32F42xxxのリファレンスマニュアル</a>
-今回使うボードのCPUのペリフェラル（周辺機器）の仕様書です。例えばLEDを光らせるにはGPIOというペリフェラルから信号を送るのですが、そういうものの使い方が知りたい場合はこのマニュアルを基本的に読むことになります。</p>
+<p>Andrew S. Tanenbaum、Herbert Bos 「Modern Operating Systems: Global Edition」
+マイクロカーネルで有名なタネンバウム先生らが書いたOSの有名な教科書です。古いエディションであれば日本語版もあります。
+かなり量も多いのですが、OSの基本的な概念を幅広く網羅されています。</p>
 </li>
 <li>
-<p><a href="https://www.st.com/resource/en/datasheet/stm32f429zi.pdf">STM32F429xxのデータシート</a>
-CPUについての詳細です。CPUの仕様はリファレンスマニュアルだけでなく、こちらのデータシートも併せて読むことになります。</p>
+<p><a href="https://os.phil-opp.com/">Writing an OS in Rust</a>
+x86系のプロセッサを対象にしたものですが、RustでOSを書くチュートリアルになっています。
+x86系固有の知識以外にも、エミュレータを組み合わせた統合テストの書き方や動的なメモリ確保のアルゴリズムの実装なども解説されているので、それ以外のプロセッサでも参考になります。</p>
 </li>
 <li>
-<p><a href="https://www.st.com/content/st_com/ja/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-f429zi.html">Nucleo-144ボードのユーザーマニュアル</a>
-ボードそのものについてのドキュメントです。どの端子やピンがどうCPUに結びついているかなどの使い方を調べるために使います。</p>
+<p><a href="https://booth.pm/ja/items/1478032">組込み/ベアメタルRustクックブック</a>
+Rustで組込みプログラミングをするのに有用なテクニックが幅広く紹介されています。日本語のドキュメントです。</p>
 </li>
-</ul>
-<h3><a class="header" href="#rust関連" id="rust関連">Rust関連</a></h3>
-<p>Rustそのものについてのドキュメントもしっかりと見ていく必要があります。
-まず、Rustに関する知識が一切ない場合、TRPLと呼ばれるチュートリアルを一通り眺めてみるのが良いでしょう。</p>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></li>
-<li><a href="https://doc.rust-jp.rs/book/second-edition/">日本語版</a>
-本書ではRustに関する初歩的な構文の知識などには触れないため、もしわからないことがあればこちらを参照してください。</li>
-</ul>
-<p>低レイヤーのプログラミングを行うにあたって、Rustの詳細な実装を知る必要がある場面があります。
-そのための本としてThe Rustonomiconというのがあります。</p>
-<ul>
-<li><a href="https://doc.rust-lang.org/nomicon/index.html">Ther Rustonomicon</a>
-こちらは必要になったら参照することになりますが、すべてを理解しておく必要はありません（正直なところ筆者もすべての項目を把握していないです）。</li>
 </ul>
 
                     </main>
@@ -214,15 +181,11 @@ CPUについての詳細です。CPUの仕様はリファレンスマニュア�
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="../1_intro/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../6_scheduler/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
-                        
-                            <a rel="next" href="../3_hello/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -232,15 +195,11 @@ CPUについての詳細です。CPUの仕様はリファレンスマニュア�
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="../1_intro/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../6_scheduler/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
-                
-                    <a rel="next" href="../3_hello/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
                 
             </nav>
 

@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="misc/bib.html">参考文献</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -1365,6 +1365,34 @@ App2
 <p>なお、Systick割り込みがなかなか表示されないことに気がつくと思いますが、これはSystickのタイマーがデバッグ状態では値が減らないためであり、
 デバッグ状態を利用するセミホスティングを利用した出力をたくさんしていると現実の時間が進んでいても、Systickのタイマーが減らないという事態が起きているからです。
 試しに<code>hprintln</code>命令を取り除いてあげるとちゃんとSystickが呼び出されるようになるはずです。</p>
+<p>このドキュメントを執筆するにあたってハードウェアのマニュアル以外に参考にしたもの、
+参考にはしていないが、この先自作OSをつくりこむにあたって参考になるであろう書籍やドキュメントを紹介します。</p>
+<ul>
+<li>
+<p><a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a>
+Rust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントです。
+このドキュメントもこのドキュメントがベースになっています。より踏み込んだロギングやDMAのためのテクニックも解説しています。</p>
+</li>
+<li>
+<p><a href="https://docs.rust-embedded.org/book/index.html">The Embedded Rust Book</a>
+こちらもRust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントですが、Rust Embeddedワーキンググループが用意したクレートを活用してのプログラミングです。
+今回はあえてこれらのクレートは使わないような実装にしましたが、特にペリフェラルのドライバを書くのに参考になると思います。</p>
+</li>
+<li>
+<p>Andrew S. Tanenbaum、Herbert Bos 「Modern Operating Systems: Global Edition」
+マイクロカーネルで有名なタネンバウム先生らが書いたOSの有名な教科書です。古いエディションであれば日本語版もあります。
+かなり量も多いのですが、OSの基本的な概念を幅広く網羅されています。</p>
+</li>
+<li>
+<p><a href="https://os.phil-opp.com/">Writing an OS in Rust</a>
+x86系のプロセッサを対象にしたものですが、RustでOSを書くチュートリアルになっています。
+x86系固有の知識以外にも、エミュレータを組み合わせた統合テストの書き方や動的なメモリ確保のアルゴリズムの実装なども解説されているので、それ以外のプロセッサでも参考になります。</p>
+</li>
+<li>
+<p><a href="https://booth.pm/ja/items/1478032">組込み/ベアメタルRustクックブック</a>
+Rustで組込みプログラミングをするのに有用なテクニックが幅広く紹介されています。日本語のドキュメントです。</p>
+</li>
+</ul>
 
                     </main>
 
