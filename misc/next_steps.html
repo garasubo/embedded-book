@@ -1,0 +1,263 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>この先の開発 - Rustで始める自作組込みOS入門</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="../6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="../misc/bib.html">参考文献</a></li><li class="chapter-item expanded affix "><a href="../misc/next_steps.html" class="active">この先の開発</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Rustで始める自作組込みOS入門</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#この先の開発" id="この先の開発">この先の開発</a></h1>
+<p>このドキュメントで扱ったのは、スケジューリングの初歩の初歩まででです。
+すでに世の中に出回っているOSと比べると機能はまだまだお粗末なものです。
+また、実装の仕方もあまり洗練されたものとは言えないでしょう。
+では、この先よりOSらしいものを実装するとなるとどういう機能を実装していけばいいのか。
+そのヒントとなるトピックをいくつか取り上げてみます。</p>
+<h2><a class="header" href="#リアルタイムスケジューリング" id="リアルタイムスケジューリング">リアルタイムスケジューリング</a></h2>
+<p>組込みアプリケーションで大事なことのひとつとして「リアルタイム性」というものがあります。
+これは決められた処理を一定の時間内に行う、という性質です。
+このリアルタイム性にはスケジューリングが重要な役割を果たします。
+通常のデスクトップOSでは細かいデッドラインが各アプリケーションに対して決まっている、というわけではなく、
+複数のアプリケーションが均等に実行できるようなことが重視され（もちろん優先度を決めたりすることでリアルタイム性を担保する仕組みもありますが）、
+組込みシステムではこのリアルタイム性がより重視されることが多く、スケジューリングのアルゴリズムもデスクトップのものとは異なってきます。</p>
+<p>いくつかリアルタイム性を担保する上での課題を紹介していきます。</p>
+<p>まず、プロセスにこれは最優先で処理すべきものと、そうでもないもの、のような差が存在します。
+例えば、歩行ロボットがバランスを取るために駆動部を動かすための計算をして指示を出す、というプロセスはきちんと決まった時間内で実行しないと転倒してしまうことになりますが、
+目を光らせるとか、人と対話をするといったためのプロセスは多少の遅れがあっても深刻な影響はでないであろう、といった感じです。
+この歩行ロボットの例ではプロセスに固定された優先度を付与しておき、優先度が高い用のプロセスのリストと低い用のリストを持っておき、前者のリストが空になってから後者のリストからプロセスをスケジュールする、といった方法を取れば解決できそうですね。</p>
+<p>ロボットの例は静的に優先度が決定できる、というものですが、実行状況や時刻によってこの優先度が動的に変動する場合もあります。
+リアルタイムシステムにはタイマーなどにより定期的に実行されるプロセスと、ボタンを押したあとに発生するなど外部からのイベントによって不定期に実行する必要があるプロセス、というものが存在します。
+つまり、プロセスのスタートするタイミングや締め切りは変動しうるということです。
+そのことを踏まえ例えば、締切が3分後だが実行には2分かかるプロセスAと締切が10分後だが実行には7分かかるプロセスBが同時に発生した場合、後者のプロセスBから実行してしまうとAの締切に間に合いません。
+このような場合、締切が近いプロセスAから実行することによってすべてのプロセスが締め切りに間に合うようにしてあげる必要があります。
+しかし、このプロセスAがプロセスBの締め切り2分前で実行が残り1分かかる、という段階で発生した場合、まずプロセスBを終わらせてからプロセスAを実行してもプロセスAの締切には間に合うので
+このような場合はプロセスBから実行しなければなりません。</p>
+<p>プロセス間で資源を取り合っていると問題はもっと複雑になることもあります。
+例えばネットワーク通信が必要な締め切りが厳しいプロセスAと、ネットワーク通信を使うが締め切りを守らなくてもいいプロセスB、ネットワーク通信は使わないが締め切りが厳しいプロセスCが存在するとします。
+プロセスBが実行してネットワーク通信をおこなっているときにプロセスCを実行する必要が出てきたとします。
+この場合、ネットワーク通信を一時中断してプロセスCを実行しなければなりません。ここでプロセスAを実行しなければならなくなり、しかもプロセスCよりも締め切りが近いので最優先に実行したいとします。
+プロセスAはネットワーク通信をしたいのですが、そのためにはまず、中断されている通信を終了させる必要があります。そうすると、本来優先度が低いはずのプロセスCから実行しなければならない、ということになってしまいます。
+そのため、このようにデバイスなどの共有資源を持っている場合、共有先のプロセスの優先度を継承して実行させる、といった仕組みを持つ場合もあります。</p>
+<p>このように、リアルタイム性という性質を満たすにはこのドキュメントで実装したラウンドロビン型のスケジューラでは解決できない課題が山のようにあるわけです。
+また、これらの課題を解決するために長い時間をかけて計算するわけにはいかないので、OS内で実装するアルゴリズムの計算量にも気をつかう必要もあります。</p>
+<h2><a class="header" href="#デバイスドライバ" id="デバイスドライバ">デバイスドライバ</a></h2>
+<p>このドキュメントではほとんど使いませんでしたが、本来はマイコンボードについているペリフェラルを使ってシステムを構築します。
+例えば、マイコンボードでのプログラミングの代名詞であるLチカにはLEDを動かすためのGPIOというモジュールを操作しなければなりませんが、
+OSはこれらのペリフェラルへの簡単なプログラミングインターフェースを提供することも期待されています。</p>
+<p>これらペリフェラルのためのデバイスドライバを書くにあたって、参考文献でも紹介していますが、Rust Embeddedワーキンググループの<a href="https://docs.rust-embedded.org/discovery/">Discovery Book</a>などのドキュメントは参考になるかもしれません。
+これはRust Embeddedグループの提供するクレートやツールを用いてRustの性質を活かしたデバイスへのアクセスの仕方を解説しています。</p>
+<h2><a class="header" href="#ヒープアロケータ" id="ヒープアロケータ">ヒープアロケータ</a></h2>
+<p>ベアメタルプログラミングではmallocのようなプログラム実行時に動的にメモリを確保することができず、スタック領域や静的に確保した領域を利用してプログラミングする必要があります。
+動的なメモリ確保は本来OSの仕事だからです。そのため、自作OSにおいても動的メモリ確保のための機能を実装するのは大事なトピックです。
+この動的メモリ確保用のメモリ領域をヒープと呼び、ここからメモリ領域を確保したり使い終わったメモリをヒープに戻すプログラムをヒープアロケーターといいます。</p>
+<p>ヒープアロケーターの実装方法はいろいろありますが、代表的なアロケーターの実装を参考文献でものせた<a href="https://os.phil-opp.com/allocator-designs/">Writing an OS in Rust</a>で紹介されています。
+実はRustはこのヒープアロケータを言語標準のものでなく自前で実装したものに置き換えるための仕組みが用意されています。
+詳しくはRustの公式ドキュメントの<a href="https://doc.rust-lang.org/core/alloc/trait.GlobalAlloc.html">GlobalAlloc</a>を参考にしてください。
+この方法に従いヒープアロケータを実装しておくことで、stdで使える一部の構造体が含まれる<a href="https://doc.rust-lang.org/alloc/index.html">alloc</a>クレートも利用可能になります。</p>
+<p>OS上で動かすアプリケーション以外でもOSそのものの中でヒープアロケーションの機能を利用することは当然できますが、
+動的なメモリ確保は失敗する可能性があり、またアルゴリズムによっては実行時間が長くなる危険性もあることには注意しましょう。</p>
+<h2><a class="header" href="#テスト" id="テスト">テスト</a></h2>
+<p>TBD</p>
+<h2><a class="header" href="#外部クレートの活用" id="外部クレートの活用">外部クレートの活用</a></h2>
+<p>TBD</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../misc/bib.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../misc/bib.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

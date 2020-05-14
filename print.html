@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="misc/bib.html">参考文献</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="misc/bib.html">参考文献</a></li><li class="chapter-item expanded affix "><a href="misc/next_steps.html">この先の開発</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -1367,32 +1367,75 @@ App2
 試しに<code>hprintln</code>命令を取り除いてあげるとちゃんとSystickが呼び出されるようになるはずです。</p>
 <p>このドキュメントを執筆するにあたってハードウェアのマニュアル以外に参考にしたもの、
 参考にはしていないが、この先自作OSをつくりこむにあたって参考になるであろう書籍やドキュメントを紹介します。</p>
-<ul>
-<li>
-<p><a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a>
-Rust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントです。
+<h4><a class="header" href="#a-hrefhttpsdocsrust-embeddedorgembedonomiconprefacehtmlthe-embednomicona" id="a-hrefhttpsdocsrust-embeddedorgembedonomiconprefacehtmlthe-embednomicona"><a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a></a></h4>
+<p>Rust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントです。
 このドキュメントもこのドキュメントがベースになっています。より踏み込んだロギングやDMAのためのテクニックも解説しています。</p>
-</li>
-<li>
-<p><a href="https://docs.rust-embedded.org/book/index.html">The Embedded Rust Book</a>
-こちらもRust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントですが、Rust Embeddedワーキンググループが用意したクレートを活用してのプログラミングです。
-今回はあえてこれらのクレートは使わないような実装にしましたが、特にペリフェラルのドライバを書くのに参考になると思います。</p>
-</li>
-<li>
-<p>Andrew S. Tanenbaum、Herbert Bos 「Modern Operating Systems: Global Edition」
-マイクロカーネルで有名なタネンバウム先生らが書いたOSの有名な教科書です。古いエディションであれば日本語版もあります。
+<h4><a class="header" href="#a-hrefhttpsdocsrust-embeddedorgbookindexhtmlthe-embedded-rust-booka" id="a-hrefhttpsdocsrust-embeddedorgbookindexhtmlthe-embedded-rust-booka"><a href="https://docs.rust-embedded.org/book/index.html">The Embedded Rust Book</a></a></h4>
+<p>こちらもRust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントですが、Rust Embeddedワーキンググループが用意したクレートを活用してのプログラミングです。
+今回はあえてこれらのクレートは使わないような実装にしましたが、特にペリフェラルのドライバを書くのに参考になると思います。
+組込みプログラミングそのものの経験があまりないようであれば<a href="https://docs.rust-embedded.org/discovery/">Discovery Book</a>がいいかもしれません。
+使うボードがDiscoveryボードという、このドキュメントでつかったものとは少々違うのですが、同じSTM32のマイコンであるため、ペリフェラルの仕様も似通っています。</p>
+<h4><a class="header" href="#andrew-s-tanenbaumherbert-bos-modern-operating-systems-global-edition" id="andrew-s-tanenbaumherbert-bos-modern-operating-systems-global-edition">Andrew S. Tanenbaum、Herbert Bos 「Modern Operating Systems: Global Edition」</a></h4>
+<p>マイクロカーネルで有名なタネンバウム先生らが書いたOSの有名な教科書です。古いエディションであれば日本語版もあります。
 かなり量も多いのですが、OSの基本的な概念を幅広く網羅されています。</p>
-</li>
-<li>
-<p><a href="https://os.phil-opp.com/">Writing an OS in Rust</a>
-x86系のプロセッサを対象にしたものですが、RustでOSを書くチュートリアルになっています。
+<h4><a class="header" href="#a-hrefhttpsosphil-oppcomwriting-an-os-in-rusta" id="a-hrefhttpsosphil-oppcomwriting-an-os-in-rusta"><a href="https://os.phil-opp.com/">Writing an OS in Rust</a></a></h4>
+<p>x86系のプロセッサを対象にしたものですが、RustでOSを書くチュートリアルになっています。
 x86系固有の知識以外にも、エミュレータを組み合わせた統合テストの書き方や動的なメモリ確保のアルゴリズムの実装なども解説されているので、それ以外のプロセッサでも参考になります。</p>
-</li>
-<li>
-<p><a href="https://booth.pm/ja/items/1478032">組込み/ベアメタルRustクックブック</a>
-Rustで組込みプログラミングをするのに有用なテクニックが幅広く紹介されています。日本語のドキュメントです。</p>
-</li>
-</ul>
+<h4><a class="header" href="#a-hrefhttpsboothpmjaitems1478032組込みベアメタルrustクックブックa" id="a-hrefhttpsboothpmjaitems1478032組込みベアメタルrustクックブックa"><a href="https://booth.pm/ja/items/1478032">組込み/ベアメタルRustクックブック</a></a></h4>
+<p>Rustで組込みプログラミングをするのに有用なテクニックが幅広く紹介されています。日本語のドキュメントです。</p>
+<h1><a class="header" href="#この先の開発" id="この先の開発">この先の開発</a></h1>
+<p>このドキュメントで扱ったのは、スケジューリングの初歩の初歩まででです。
+すでに世の中に出回っているOSと比べると機能はまだまだお粗末なものです。
+また、実装の仕方もあまり洗練されたものとは言えないでしょう。
+では、この先よりOSらしいものを実装するとなるとどういう機能を実装していけばいいのか。
+そのヒントとなるトピックをいくつか取り上げてみます。</p>
+<h2><a class="header" href="#リアルタイムスケジューリング" id="リアルタイムスケジューリング">リアルタイムスケジューリング</a></h2>
+<p>組込みアプリケーションで大事なことのひとつとして「リアルタイム性」というものがあります。
+これは決められた処理を一定の時間内に行う、という性質です。
+このリアルタイム性にはスケジューリングが重要な役割を果たします。
+通常のデスクトップOSでは細かいデッドラインが各アプリケーションに対して決まっている、というわけではなく、
+複数のアプリケーションが均等に実行できるようなことが重視され（もちろん優先度を決めたりすることでリアルタイム性を担保する仕組みもありますが）、
+組込みシステムではこのリアルタイム性がより重視されることが多く、スケジューリングのアルゴリズムもデスクトップのものとは異なってきます。</p>
+<p>いくつかリアルタイム性を担保する上での課題を紹介していきます。</p>
+<p>まず、プロセスにこれは最優先で処理すべきものと、そうでもないもの、のような差が存在します。
+例えば、歩行ロボットがバランスを取るために駆動部を動かすための計算をして指示を出す、というプロセスはきちんと決まった時間内で実行しないと転倒してしまうことになりますが、
+目を光らせるとか、人と対話をするといったためのプロセスは多少の遅れがあっても深刻な影響はでないであろう、といった感じです。
+この歩行ロボットの例ではプロセスに固定された優先度を付与しておき、優先度が高い用のプロセスのリストと低い用のリストを持っておき、前者のリストが空になってから後者のリストからプロセスをスケジュールする、といった方法を取れば解決できそうですね。</p>
+<p>ロボットの例は静的に優先度が決定できる、というものですが、実行状況や時刻によってこの優先度が動的に変動する場合もあります。
+リアルタイムシステムにはタイマーなどにより定期的に実行されるプロセスと、ボタンを押したあとに発生するなど外部からのイベントによって不定期に実行する必要があるプロセス、というものが存在します。
+つまり、プロセスのスタートするタイミングや締め切りは変動しうるということです。
+そのことを踏まえ例えば、締切が3分後だが実行には2分かかるプロセスAと締切が10分後だが実行には7分かかるプロセスBが同時に発生した場合、後者のプロセスBから実行してしまうとAの締切に間に合いません。
+このような場合、締切が近いプロセスAから実行することによってすべてのプロセスが締め切りに間に合うようにしてあげる必要があります。
+しかし、このプロセスAがプロセスBの締め切り2分前で実行が残り1分かかる、という段階で発生した場合、まずプロセスBを終わらせてからプロセスAを実行してもプロセスAの締切には間に合うので
+このような場合はプロセスBから実行しなければなりません。</p>
+<p>プロセス間で資源を取り合っていると問題はもっと複雑になることもあります。
+例えばネットワーク通信が必要な締め切りが厳しいプロセスAと、ネットワーク通信を使うが締め切りを守らなくてもいいプロセスB、ネットワーク通信は使わないが締め切りが厳しいプロセスCが存在するとします。
+プロセスBが実行してネットワーク通信をおこなっているときにプロセスCを実行する必要が出てきたとします。
+この場合、ネットワーク通信を一時中断してプロセスCを実行しなければなりません。ここでプロセスAを実行しなければならなくなり、しかもプロセスCよりも締め切りが近いので最優先に実行したいとします。
+プロセスAはネットワーク通信をしたいのですが、そのためにはまず、中断されている通信を終了させる必要があります。そうすると、本来優先度が低いはずのプロセスCから実行しなければならない、ということになってしまいます。
+そのため、このようにデバイスなどの共有資源を持っている場合、共有先のプロセスの優先度を継承して実行させる、といった仕組みを持つ場合もあります。</p>
+<p>このように、リアルタイム性という性質を満たすにはこのドキュメントで実装したラウンドロビン型のスケジューラでは解決できない課題が山のようにあるわけです。
+また、これらの課題を解決するために長い時間をかけて計算するわけにはいかないので、OS内で実装するアルゴリズムの計算量にも気をつかう必要もあります。</p>
+<h2><a class="header" href="#デバイスドライバ" id="デバイスドライバ">デバイスドライバ</a></h2>
+<p>このドキュメントではほとんど使いませんでしたが、本来はマイコンボードについているペリフェラルを使ってシステムを構築します。
+例えば、マイコンボードでのプログラミングの代名詞であるLチカにはLEDを動かすためのGPIOというモジュールを操作しなければなりませんが、
+OSはこれらのペリフェラルへの簡単なプログラミングインターフェースを提供することも期待されています。</p>
+<p>これらペリフェラルのためのデバイスドライバを書くにあたって、参考文献でも紹介していますが、Rust Embeddedワーキンググループの<a href="https://docs.rust-embedded.org/discovery/">Discovery Book</a>などのドキュメントは参考になるかもしれません。
+これはRust Embeddedグループの提供するクレートやツールを用いてRustの性質を活かしたデバイスへのアクセスの仕方を解説しています。</p>
+<h2><a class="header" href="#ヒープアロケータ" id="ヒープアロケータ">ヒープアロケータ</a></h2>
+<p>ベアメタルプログラミングではmallocのようなプログラム実行時に動的にメモリを確保することができず、スタック領域や静的に確保した領域を利用してプログラミングする必要があります。
+動的なメモリ確保は本来OSの仕事だからです。そのため、自作OSにおいても動的メモリ確保のための機能を実装するのは大事なトピックです。
+この動的メモリ確保用のメモリ領域をヒープと呼び、ここからメモリ領域を確保したり使い終わったメモリをヒープに戻すプログラムをヒープアロケーターといいます。</p>
+<p>ヒープアロケーターの実装方法はいろいろありますが、代表的なアロケーターの実装を参考文献でものせた<a href="https://os.phil-opp.com/allocator-designs/">Writing an OS in Rust</a>で紹介されています。
+実はRustはこのヒープアロケータを言語標準のものでなく自前で実装したものに置き換えるための仕組みが用意されています。
+詳しくはRustの公式ドキュメントの<a href="https://doc.rust-lang.org/core/alloc/trait.GlobalAlloc.html">GlobalAlloc</a>を参考にしてください。
+この方法に従いヒープアロケータを実装しておくことで、stdで使える一部の構造体が含まれる<a href="https://doc.rust-lang.org/alloc/index.html">alloc</a>クレートも利用可能になります。</p>
+<p>OS上で動かすアプリケーション以外でもOSそのものの中でヒープアロケーションの機能を利用することは当然できますが、
+動的なメモリ確保は失敗する可能性があり、またアルゴリズムによっては実行時間が長くなる危険性もあることには注意しましょう。</p>
+<h2><a class="header" href="#テスト" id="テスト">テスト</a></h2>
+<p>TBD</p>
+<h2><a class="header" href="#外部クレートの活用" id="外部クレートの活用">外部クレートの活用</a></h2>
+<p>TBD</p>
 
                     </main>
 
