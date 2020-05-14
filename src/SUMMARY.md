@@ -8,3 +8,4 @@
 - [スケジューラを実装する](./6_scheduler/index.md)
 
 [参考文献](./misc/bib.md)
+[この先の開発](./misc/next_steps.md)
