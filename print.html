@@ -297,7 +297,7 @@ OSのないベアメタル環境ではどのように自分の実行したいプ
 <h2><a class="header" href="#no_std環境下でのrust" id="no_std環境下でのrust">no_std環境下でのRust</a></h2>
 <p>自分のプログラムをボード上で実行させる方法がなんとなくわかったと思いますが、問題はどうやったらこのフォーマットに従ったプログラムをRustで書いてバイナリにすればいいか、です。
 それを解説したのがThe Embednomiconだったわけです。</p>
-<p>通常、Rustのプログラムを書くときstdクーレートと呼ばれる言語の標準ライブラリを利用してプログラムをコンパイルすることになります。
+<p>通常、Rustのプログラムを書くときstdクレートと呼ばれる言語の標準ライブラリを利用してプログラムをコンパイルすることになります。
 しかし、このstdクレートは様々なOSの機能を利用することを前提として実装されているので、OSのないベアメタル環境下では当然動きません。
 また、コンパイルしたときのフォーマットもOS上で実行するためのフォーマットになっているので、それも変更しなければなりません。
 前者の問題を解決するための手段が<code>#![no_std]</code>アトリビュートです。これを使うとstdクレートの代わりに、OSの存在なしでも利用できる機能を提供する<code>core</code>クレートを使ってプログラムをコンパイルしてくれます。</p>
@@ -770,7 +770,7 @@ pub fn init() {
     }
 }
 </code></pre>
-<p><code>read_volative</code>及び<code>write_volatile</code>はともに<code>unsafe</code>な関数なので<code>unsafe</code>ブロックで囲う必要があります。
+<p><code>read_volatile</code>及び<code>write_volatile</code>はともに<code>unsafe</code>な関数なので<code>unsafe</code>ブロックで囲う必要があります。
 なお、アドレスを渡す際に<code>usize</code>型をポインタにキャストしている部分がありますが、この操作自体はRustでは安全とされています。
 ただし、このアドレスをいざ読み書きする段階になると、この先にあるアドレスがちゃんとしたものになっているかの保証もないですし、ライフタイムのチェックもないので<code>unsafe</code>となるわけです。</p>
 <p>さて、これでコンパイルすると、今までのメッセージに加えてSysTickハンドラが1秒毎に呼び出されてメッセージが表示されているはずです。
@@ -794,7 +794,7 @@ pub fn init() {
 ここで注意したいのが、スレッドモードもハンドラモードも１章で言及した「カーネルモード」と対応するものではないということです。このモードの違いは権限を分けるためのものではないからです。</p>
 <p>プログラムの権限を調整するのが特権です。特権状態と非特権状態が存在します。特権状態でないと実行できない命令が存在します。
 ハンドラモードでは常に特権状態になりますが、スレッドモードでは非特権状態になることが可能です。
-OSが実行するときはプロセッサの機能がすべて使えるように特権モードになるべきで、そうでない通常のアプリケーションの場合は非特権モードを使うのがよさそうですね。</p>
+OSが実行するときはプロセッサの機能がすべて使えるように特権状態になるべきで、そうでない通常のアプリケーションの場合は非特権状態を使うのがよさそうですね。</p>
 <p>ARMv7-Mではスタックポインタが２種類存在して使い分けることができる、ということは４章でもちらっと言いましたが、ここでちゃんと見てみましょう。
 スタックポインタにはメインとプロセスの２種類存在していて、前述したモードや特権とは独立したパラメータとして設定することができます。
 ただし、ハンドラモードでは常にメインが使われることになります。</p>
@@ -901,7 +901,7 @@ use process::ContextFrame;
 
 ...
     let ptr = (&amp;APP_STACK[0] as *const u8 as usize) + 1024 - 0x20;
-    let context_freame: &amp;mut ContextFrame = &amp;mut *(ptr as *mut ContextFrame);
+    let context_frame: &amp;mut ContextFrame = &amp;mut *(ptr as *mut ContextFrame);
 ...
 </code></pre>
 <p>ポインタを参照に変換する処理はunsafeです。Reset関数内に書いているのであれば、Reset関数そのものがunsafeなのでunsafeブロックで囲う必要はないですが、それ以外の普通の関数としてくくりだしているときはunsafeブロックで囲ってあげましょう。</p>
@@ -921,15 +921,15 @@ use process::ContextFrame;
     loop {}
 }
 </code></pre>
-<p>この関数を使い以下のようようなコードを書けば、初期領域ができます。</p>
-<pre><code>    context_freame.r0 = 0;
-    context_freame.r1 = 0;
-    context_freame.r2 = 0;
-    context_freame.r3 = 0;
-    context_freame.r12 = 0;
-    context_freame.lr = 0;
-    context_freame.return_addr = app_main as u32;
-    context_freame.xpsr = 0x0100_0000;
+<p>この関数を使い以下のようなコードを書けば、初期領域ができます。</p>
+<pre><code>    context_frame.r0 = 0;
+    context_frame.r1 = 0;
+    context_frame.r2 = 0;
+    context_frame.r3 = 0;
+    context_frame.r12 = 0;
+    context_frame.lr = 0;
+    context_frame.return_addr = app_main as u32;
+    context_frame.xpsr = 0x0100_0000;
 </code></pre>
 <p>あとは、<code>svc</code>命令を呼び出して上げましょう。プロセススタックポインタの値を初期化するのもあわせて行う必要があります。</p>
 <pre><code>    asm!(

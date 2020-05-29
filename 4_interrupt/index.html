@@ -338,7 +338,7 @@ pub fn init() {
     }
 }
 </code></pre>
-<p><code>read_volative</code>及び<code>write_volatile</code>はともに<code>unsafe</code>な関数なので<code>unsafe</code>ブロックで囲う必要があります。
+<p><code>read_volatile</code>及び<code>write_volatile</code>はともに<code>unsafe</code>な関数なので<code>unsafe</code>ブロックで囲う必要があります。
 なお、アドレスを渡す際に<code>usize</code>型をポインタにキャストしている部分がありますが、この操作自体はRustでは安全とされています。
 ただし、このアドレスをいざ読み書きする段階になると、この先にあるアドレスがちゃんとしたものになっているかの保証もないですし、ライフタイムのチェックもないので<code>unsafe</code>となるわけです。</p>
 <p>さて、これでコンパイルすると、今までのメッセージに加えてSysTickハンドラが1秒毎に呼び出されてメッセージが表示されているはずです。
