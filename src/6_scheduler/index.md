@@ -422,11 +422,11 @@ use scheduler::Scheduler;
     #[link_section = ".app_stack"]
     static mut APP_STACK3: [u8; 2048] = [0; 2048];
 
-    let mut process1 = Process::new(&mut APP_STACK, app_main);
+    let process1 = Process::new(&mut APP_STACK, app_main);
     let mut item1 = ListItem::new(process1);
-    let mut process2 = Process::new(&mut APP_STACK2, app_main2);
+    let process2 = Process::new(&mut APP_STACK2, app_main2);
     let mut item2 = ListItem::new(process2);
-    let mut process3 = Process::new(&mut APP_STACK3, app_main3);
+    let process3 = Process::new(&mut APP_STACK3, app_main3);
     let mut item3 = ListItem::new(process3);
     let mut sched = Scheduler::new();
     sched.push(&mut item1);
