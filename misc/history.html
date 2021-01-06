@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>参考文献 - Rustで始める自作組込みOS入門</title>
+        <title>更新履歴 - Rustで始める自作組込みOS入門</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="../6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="../misc/bib.html" class="active">参考文献</a></li><li class="chapter-item expanded affix "><a href="../misc/next_steps.html">この先の開発</a></li><li class="chapter-item expanded affix "><a href="../misc/history.html">更新履歴</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../1_intro/index.html"><strong aria-hidden="true">1.</strong> はじめに</a></li><li class="chapter-item expanded "><a href="../2_setup/index.html"><strong aria-hidden="true">2.</strong> 環境構築</a></li><li class="chapter-item expanded "><a href="../3_hello/index.html"><strong aria-hidden="true">3.</strong> ベアメタルでHello World</a></li><li class="chapter-item expanded "><a href="../4_interrupt/index.html"><strong aria-hidden="true">4.</strong> 割り込み</a></li><li class="chapter-item expanded "><a href="../5_process/index.html"><strong aria-hidden="true">5.</strong> プロセス切り替え</a></li><li class="chapter-item expanded "><a href="../6_scheduler/index.html"><strong aria-hidden="true">6.</strong> スケジューラを実装する</a></li><li class="chapter-item expanded affix "><a href="../misc/bib.html">参考文献</a></li><li class="chapter-item expanded affix "><a href="../misc/next_steps.html">この先の開発</a></li><li class="chapter-item expanded affix "><a href="../misc/history.html" class="active">更新履歴</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -147,39 +147,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p>このドキュメントを執筆するにあたってハードウェアのマニュアル以外に参考にしたもの、
-参考にはしていないが、この先自作OSをつくりこむにあたって参考になるであろう書籍やドキュメントを紹介します。</p>
-<h4><a class="header" href="#a-hrefhttpsdocsrust-embeddedorgembedonomiconprefacehtmlthe-embednomicona" id="a-hrefhttpsdocsrust-embeddedorgembedonomiconprefacehtmlthe-embednomicona"><a href="https://docs.rust-embedded.org/embedonomicon/preface.html">The Embednomicon</a></a></h4>
-<p>Rust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントです。
-このドキュメントもこのドキュメントがベースになっています。より踏み込んだロギングやDMAのためのテクニックも解説しています。</p>
-<h4><a class="header" href="#a-hrefhttpsdocsrust-embeddedorgbookindexhtmlthe-embedded-rust-booka" id="a-hrefhttpsdocsrust-embeddedorgbookindexhtmlthe-embedded-rust-booka"><a href="https://docs.rust-embedded.org/book/index.html">The Embedded Rust Book</a></a></h4>
-<p>こちらもRust Embeddedワーキンググループが公開しているRustでベアメタルプログラミングをするための解説ドキュメントですが、Rust Embeddedワーキンググループが用意したクレートを活用してのプログラミングです。
-今回はあえてこれらのクレートは使わないような実装にしましたが、特にペリフェラルのドライバを書くのに参考になると思います。
-組込みプログラミングそのものの経験があまりないようであれば<a href="https://docs.rust-embedded.org/discovery/">Discovery Book</a>がいいかもしれません。
-使うボードがDiscoveryボードという、このドキュメントでつかったものとは少々違うのですが、同じSTM32のマイコンであるため、ペリフェラルの仕様も似通っています。</p>
-<h4><a class="header" href="#andrew-s-tanenbaumherbert-bos-modern-operating-systems-global-edition" id="andrew-s-tanenbaumherbert-bos-modern-operating-systems-global-edition">Andrew S. Tanenbaum、Herbert Bos 「Modern Operating Systems: Global Edition」</a></h4>
-<p>マイクロカーネルで有名なタネンバウム先生らが書いたOSの有名な教科書です。古いエディションであれば日本語版もあります。
-かなり量も多いのですが、OSの基本的な概念を幅広く網羅されています。</p>
-<h4><a class="header" href="#a-hrefhttpsosphil-oppcomwriting-an-os-in-rusta" id="a-hrefhttpsosphil-oppcomwriting-an-os-in-rusta"><a href="https://os.phil-opp.com/">Writing an OS in Rust</a></a></h4>
-<p>x86系のプロセッサを対象にしたものですが、RustでOSを書くチュートリアルになっています。
-x86系固有の知識以外にも、エミュレータを組み合わせた統合テストの書き方や動的なメモリ確保のアルゴリズムの実装なども解説されているので、それ以外のプロセッサでも参考になります。</p>
-<h4><a class="header" href="#a-hrefhttpsboothpmjaitems1478032組込みベアメタルrustクックブックa" id="a-hrefhttpsboothpmjaitems1478032組込みベアメタルrustクックブックa"><a href="https://booth.pm/ja/items/1478032">組込み/ベアメタルRustクックブック</a></a></h4>
-<p>Rustで組込みプログラミングをするのに有用なテクニックが幅広く紹介されています。日本語のドキュメントです。</p>
+                        <h1><a class="header" href="#更新履歴" id="更新履歴">更新履歴</a></h1>
+<p>メジャーな更新についてのリストです。誤字・脱字などの軽微な修正は含みません</p>
+<h2><a class="header" href="#20210106" id="20210106">2021/01/06</a></h2>
+<p>「更新履歴」の章を追加</p>
+<h2><a class="header" href="#20200514" id="20200514">2020/05/14</a></h2>
+<p>「参考文献」、「この先の開発」の章を追加</p>
+<h2><a class="header" href="#20200511" id="20200511">2020/05/11</a></h2>
+<p>スケジューラの章を追加</p>
+<h2><a class="header" href="#20200502" id="20200502">2020/05/02</a></h2>
+<p>公開開始</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="../6_scheduler/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../misc/next_steps.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
-                        
-                            <a rel="next" href="../misc/next_steps.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -189,15 +177,11 @@ x86系固有の知識以外にも、エミュレータを組み合わせた統�
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="../6_scheduler/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../misc/next_steps.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
-                
-                    <a rel="next" href="../misc/next_steps.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
                 
             </nav>
 
