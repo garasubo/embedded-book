@@ -9,3 +9,4 @@
 
 [参考文献](./misc/bib.md)
 [この先の開発](./misc/next_steps.md)
+[更新履歴](./misc/history.md)
