@@ -418,7 +418,7 @@ impl&lt;'a, T&gt; DerefMut for ListItem&lt;'a, T&gt; {
 また、カーネルに復帰した際、その時点でのプロセススタックポインタと<code>ContextFrame</code>の中に保存されていないレジスタを保存する処理も必要です。</p>
 <pre><code>    pub fn exec(&amp;mut self) {
         unsafe {
-            asm!(
+            llvm_asm!(
                 &quot;
                 msr psp, r0
                 ldmia r1, {r4-r11}

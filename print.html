@@ -232,8 +232,8 @@ CPUそのものがそういう用途ではないからです。</p>
 </code></pre>
 <p>rustupはRustコンパイラのインストール・アップデートやバージョン管理をしてくれるツールです。
 今回は特に<code>nightly</code>と呼ばれる、いわゆるベータ版のようなRustコンパイラを使うことになるのですが、nightlyと安定版である<code>stable</code>の切り替えもコマンド一つで行えて大変便利です。</p>
-<p>今回はnightlyの2019-09-19のバージョンを使います。以下のようにして<code>nightly-2019-09-18</code>をインストールしましょう。</p>
-<pre><code>$ rustup install nightly-2019-09-18
+<p>今回はnightlyの2020-10-25のバージョンを使います。以下のようにして<code>nightly-2020-10-25</code>をインストールしましょう。</p>
+<pre><code>$ rustup install nightly-2020-10-25
 </code></pre>
 <p>さらにArmのクロスコンパイル用の環境を入れるために以下のコマンドを実行します</p>
 <pre><code>$ rustup target add thumbv7em-none-eabihf
@@ -834,7 +834,7 @@ SVCall例外が発生したとき、<code>SVCall</code>という関数を呼び�
 <code>SysTick</code>のときと同じように<code>extern &quot;C&quot;</code>で宣言しているところから<code>SVCall</code>を消す必要もあります。</p>
 <pre><code>#[no_mangle]
 pub unsafe extern &quot;C&quot; fn SVCall() {
-    asm!(
+    llvm_asm!(
         &quot;
         cmp lr, #0xfffffff9
         bne to_kernel
@@ -856,10 +856,11 @@ pub unsafe extern &quot;C&quot; fn SVCall() {
     ::::&quot;volatile&quot;);
 }
 </code></pre>
-<p>さて、いきなり<code>asm!</code>というものが現れました。これはインラインアセンブラと呼ばれるもので、アセンブラ命令を直接埋め込むための記法です。
+<p>さて、いきなり<code>llvm_asm!</code>というものが現れました。これはインラインアセンブラと呼ばれるもので、アセンブラ命令を直接埋め込むための記法です。
+先頭にllvmとついていることからわかるように、この記法はRustコンパイラのバックエンドであるLLVMに依存したものです。
 ただし、この記法はstableのコンパイラではサポートされておらず、このままコンパイルするとエラーが出てしまいます。
 このようにstableでサポートされていない機能を用いるには、以下のような宣言を追加する必要があります。</p>
-<pre><code>#![feature(asm)]
+<pre><code>#![feature(llvm_asm)]
 </code></pre>
 <p>これをmain.rsの冒頭に置いておきましょう。これでとりあえずコンパイルは通るようになるはずです。
 なぜ今回アセンブラ命令を直接使ったかというと、LRやシステムレジスタに直接アクセスする必要があったからです。
@@ -870,7 +871,7 @@ pub unsafe extern &quot;C&quot; fn SVCall() {
 <code>bne</code>は直前の比較命令で等しくない場合にラベルまでジャンプするという命令です。
 <code>msr</code>というのがシステムレジスタに値を書き込む命令です。<code>CONTROL</code>レジスタに1を書き込むことで非特権状態にすることができます。
 <code>movw</code>と<code>movt</code>命令でリンクレジスタの値を書き換えることで、使うスタックを切り替え、<code>bx</code>命令で例外復帰している、というような流れです。
-インラインアセンブラはRustのコンパイラのバックエンドであるLLVMでのインラインアセンブラの記法に直接紐付いているので、詳しい記法については<a href="http://llvm.org/docs/LangRef.html#inline-assembler-expressions">LLVMのドキュメント</a>を参照するといいでしょう。
+<code>llvm_asm</code>で記述するインラインアセンブラはLLVMでのインラインアセンブラの記法に直接紐付いているので、詳しい記法については<a href="http://llvm.org/docs/LangRef.html#inline-assembler-expressions">LLVMのドキュメント</a>を参照するといいでしょう。
 アセンブラそのものの詳細についてはリファレンスマニュアルのA4章を参照するか、ネットで検索してもわかりやすい資料が結構あると思います。</p>
 <p>さて、<code>svc</code>命令でアプリケーション用の状態にしていきたいところですが、その前に、アプリケーション用のスタックポインタの初期値を決める必要があります。
 さらに、<code>SVCall</code>関数で例外復帰する際にスタックポインタに保存されたレジスタの値を実際のレジスタに書き戻すという処理がなされます。
@@ -954,16 +955,18 @@ use process::ContextFrame;
     context_frame.xpsr = 0x0100_0000;
 </code></pre>
 <p>あとは、<code>svc</code>命令を呼び出して上げましょう。プロセススタックポインタの値を初期化するのもあわせて行う必要があります。</p>
-<pre><code>    asm!(
+<pre><code>    llvm_asm!(
         &quot;
         msr psp, r0
         svc 0
         &quot;
-        ::&quot;{r0}&quot;(ptr):&quot;r4&quot;, &quot;r5&quot;, &quot;r6&quot;, &quot;r7&quot;, &quot;r8&quot;, &quot;r9&quot;, &quot;r10&quot;, &quot;r11&quot;:&quot;volatile&quot;);
+        ::&quot;{r0}&quot;(ptr):&quot;r4&quot;, &quot;r5&quot;, &quot;r6&quot;, &quot;r8&quot;, &quot;r9&quot;, &quot;r10&quot;, &quot;r11&quot;:&quot;volatile&quot;);
 </code></pre>
 <p>3つ目のコロンに続くところにr4などのレジスタが列挙されていますが、これはこのアセンブラ命令中に変更される可能性があるレジスタです。
 このように書いておけば、コンパイルするときにこれらのレジスタが変更されることを考慮したコードが出力されます。
-4章でも触れましたが、例外が発生したときにこれらのレジスタはスタックに保存されないため、これらはきちんと保存しなければなりません。</p>
+4章でも触れましたが、例外が発生したときにこれらのレジスタはスタックに保存されないため、これらはきちんと保存しなければなりません。
+<code>r7</code>のみ保存されていないことに気がつくかと思いますが、実はLLVMの中で<code>r7</code>は特殊なレジスタでこのリストの中に入れていなくても大丈夫です。
+生成されたアセンブラを見てみると<code>r7</code>も含めて保存されていることがわかると思います。</p>
 <p>さて、ここまでできればあとはビルドして実行するだけです。
 以下のような出力がOpenOCDから出てくるはずです。</p>
 <pre><code>Hello World
@@ -1231,7 +1234,7 @@ impl&lt;'a, T&gt; DerefMut for ListItem&lt;'a, T&gt; {
 また、カーネルに復帰した際、その時点でのプロセススタックポインタと<code>ContextFrame</code>の中に保存されていないレジスタを保存する処理も必要です。</p>
 <pre><code>    pub fn exec(&amp;mut self) {
         unsafe {
-            asm!(
+            llvm_asm!(
                 &quot;
                 msr psp, r0
                 ldmia r1, {r4-r11}
@@ -1477,6 +1480,8 @@ Cortex-MのようなアーキテクチャでもQEMUを用いたエミュレー�
 </ul>
 <h1><a class="header" href="#更新履歴" id="更新履歴">更新履歴</a></h1>
 <p>メジャーな更新についてのリストです。誤字・脱字などの軽微な修正は含みません</p>
+<h2><a class="header" href="#20210107" id="20210107">2021/01/07</a></h2>
+<p>コンパイラのバージョンを更新し、それに合わせてインラインアセンブラについての記述も更新</p>
 <h2><a class="header" href="#20210106" id="20210106">2021/01/06</a></h2>
 <p>「更新履歴」の章を追加</p>
 <h2><a class="header" href="#20200514" id="20200514">2020/05/14</a></h2>
