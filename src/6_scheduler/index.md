@@ -280,7 +280,7 @@ impl<'a> Process<'a> {
 ```
     pub fn exec(&mut self) {
         unsafe {
-            asm!(
+            llvm_asm!(
                 "
                 msr psp, r0
                 ldmia r1, {r4-r11}
